@@ -390,9 +390,13 @@ jQuery(document).ready(function ($) {
 		$(this).after('<span class="edd-cart-ajax"><i class="edd-icon-spinner edd-icon-spin"></i></span>');
 
 		var data = $('#edd_purchase_form').serialize();
+		var payment_mode = $('input[name="payment-mode"]:checked').val();
 		data += '&edd_ajax=true';
 		data += '&'+wpidea.nonce_name+'='+wpidea.nonce_value;
 
+		if(payment_mode === "stripe") {
+			data += '&action=edd_process_checkout';
+		}
 
 		$.post(wpidea.urls.payment_process_checkout, data, function(data) {
 			if ( $.trim(data) == 'success' ) {
