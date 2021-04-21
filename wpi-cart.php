@@ -152,7 +152,7 @@ final class WPI_Cart {
 
 		// Plugin version.
 		if ( ! defined( 'EDD_VERSION' ) ) {
-			define( 'EDD_VERSION', '2.5.106' );
+			define( 'EDD_VERSION', '2.5.17' );
 		}
 
 		// Plugin Folder Path.
