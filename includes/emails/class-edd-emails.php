@@ -297,6 +297,8 @@ class EDD_Emails {
 		$log_errors = apply_filters( 'edd_log_email_errors', true, $to, $subject, $message );
 
 		if( ! $sent && true === $log_errors ) {
+            do_action( 'edd_email_send_error', $this );
+
 			if ( is_array( $to ) ) {
 				$to = implode( ',', $to );
 			}
