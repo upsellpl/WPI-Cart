@@ -3693,3 +3693,6 @@ msgstr "Tagi"
 
 msgid "to"
 msgstr "do"
+
+msgid "Course Panel"
+msgstr "Panel kursu"

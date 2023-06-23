@@ -393,6 +393,9 @@ class EDD_Download {
 
 			if ( $download_files ) {
 
+			    foreach ( $download_files as $key => &$file_info ) {
+			        $file_info['name'] = __( $file_info['name'], 'easy-digital-downloads' );
+			    }
 
 				if ( ! is_null( $variable_price_id ) && $this->has_variable_prices() ) {
 
