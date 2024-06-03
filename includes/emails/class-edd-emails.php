@@ -297,6 +297,8 @@ class EDD_Emails {
 		$log_errors = apply_filters( 'edd_log_email_errors', true, $to, $subject, $message );
 
 		if( ! $sent && true === $log_errors ) {
+            do_action('edd_email_send_attempt_failed', $to, $subject, $message);
+
 			if ( is_array( $to ) ) {
 				$to = implode( ',', $to );
 			}
@@ -310,6 +312,8 @@ class EDD_Emails {
 
 			error_log( $log_message );
 		}
+
+        do_action('edd_email_send_attempt_succeeded', $to, $subject, $message);
 
 		/**
 		 * Hooks after the email is sent
