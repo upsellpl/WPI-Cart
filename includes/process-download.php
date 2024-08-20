@@ -143,6 +143,12 @@ function edd_process_download() {
 		header("Content-Disposition: attachment; filename=\"" . apply_filters( 'edd_requested_file_name', basename( $requested_file ) ) . "\"");
 		header("Content-Transfer-Encoding: binary");
 
+        $attachment_id = (int)$attachment_id;
+        
+        if($attachment_id > 0){
+            do_action('wpi_file_downloaded', $attachment_id);
+        }
+
 		// If the file isn't locally hosted, process the redirect
 		if ( filter_var( $requested_file, FILTER_VALIDATE_URL ) && ! edd_is_local_file( $requested_file ) ) {
 			edd_deliver_download( $requested_file, apply_filters( 'edd_file_download_method_redirect', true ) );
