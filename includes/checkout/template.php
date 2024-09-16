@@ -115,13 +115,13 @@ function edd_show_purchase_form() {
 
 		if( edd_get_cart_total() > 0 ) {
 
-            // Load the credit card form and allow gateways to load their own if they wish
-            if ( has_action( 'edd_' . $payment_mode . '_cc_form' ) ) {
-                do_action( 'edd_' . $payment_mode . '_cc_form' );
-            }
-            else if (!has_action( 'edd_no_gateways_cc_form' )) {
-                do_action( 'edd_cc_form' );
-            }
+                // Load the credit card form and allow gateways to load their own if they wish
+                if ( has_action( 'edd_' . $payment_mode . '_cc_form' ) ) {
+                    do_action( 'edd_' . $payment_mode . '_cc_form' );
+                }
+                else if (!has_action( 'edd_no_gateways_cc_form' )) {
+                    do_action( 'edd_cc_form' );
+                }
 
 		}
 
