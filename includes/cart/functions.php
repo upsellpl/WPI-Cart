@@ -133,7 +133,12 @@ function edd_get_cart_quantity() {
  * @return string Cart key of the new item
  */
 function edd_add_to_cart( $download_id, $options = array() ) {
+    $download_id = (int)$download_id;
 	$download = get_post( $download_id );
+
+    if (!$download) {
+        return;
+    }
 
 	if( 'download' != $download->post_type )
 		return; // Not a download product
