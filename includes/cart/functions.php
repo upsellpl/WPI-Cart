@@ -199,7 +199,7 @@ function edd_add_to_cart( $download_id, $options = array() ) {
 
 		}
 		if( empty($items) ) {
-		    //TODO komunikat o błędnych numerach wariantów
+		    do_action('adding_product_to_cart_failed', 'invalid_price_ids');
 		    return;
 		}
 
@@ -209,14 +209,14 @@ function edd_add_to_cart( $download_id, $options = array() ) {
     	    $price_id = preg_replace( '/[^0-9]/', '', $options['price_id'] );
 
     		if (is_array($variable_prices) && !isset( $variable_prices[ $price_id ] )) {
-    		    //TODO komunikat o błędnym numerze wariantu
+    		    do_action('adding_product_to_cart_failed', 'invalid_price_id');
     		    return;
     		}
     		$options['price_id'] = $price_id;
 	    }
 	    else {
 	        if ( is_array($variable_prices) && !empty($variable_prices) ) {
-	            //TODO komunikat o niepodaniu numeru wariantu
+	            do_action('adding_product_to_cart_failed', 'no_price_id');
 	            return;
 	        }
 	    }
