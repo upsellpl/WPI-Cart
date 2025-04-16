@@ -11,6 +11,17 @@ jQuery(document).ready(function ($) {
 	$('.edd-no-js').hide();
 	$('a.edd-add-to-cart').addClass('edd-has-js');
 
+	const edd_purchase_form = document.getElementById('edd_purchase_form');
+
+	if (edd_purchase_form) {
+		edd_purchase_form.addEventListener('keydown', function(event) {
+		if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA') {
+		  event.preventDefault();
+		}
+	  });
+	}
+	
+
 	// Send Remove from Cart requests
 	$('body').on('click.eddRemoveFromCart', '.edd-remove-from-cart', function (event) {
 		var $this  = $(this),
@@ -373,44 +384,91 @@ jQuery(document).ready(function ($) {
 		}
 	}
 
-	$(document).on('click', '#edd_purchase_form #edd_purchase_submit input[type=submit]', function(e) {
-		if(!is_wpidea_loaded){
+	$(document).on('click', '#edd_purchase_form #edd_purchase_submit input[type=submit], #edd_purchase_form #edd_purchase_submit button[type=submit]:not(#edd-payu-button-pay-for-all):not(#edd-payu-button-pay-for-recurring)', function (e) {
+		if (!is_wpidea_loaded) {
 			console.log('WP Idea not loaded!');
 			return;
 		}
 
 		var eddPurchaseform = document.getElementById('edd_purchase_form');
-		if( typeof eddPurchaseform.checkValidity === "function" && false === eddPurchaseform.checkValidity() ) {
+		if (typeof eddPurchaseform.checkValidity === "function" && false === eddPurchaseform.checkValidity()) {
 			return;
 		}
 		e.preventDefault();
-		var complete_purchase_val = $(this).val();
-		$(this).val(edd_global_vars.purchase_loading);
-		$(this).prop( 'disabled', true );
-		$(this).after('<span class="edd-cart-ajax"><i class="edd-icon-spinner edd-icon-spin"></i></span>');
+
+		let button = $(this);
+		let elementType = button.is('button') ? 'button' : 'input';
+
+		var complete_purchase_val = getButtonText(button, elementType);
+		setButtonText(button, elementType, edd_global_vars.purchase_loading);
+		button.prop('disabled', true);
+		button.after('<span class="edd-cart-ajax"><i class="edd-icon-spinner edd-icon-spin"></i></span>');
 
 		var data = $('#edd_purchase_form').serialize();
 		data += '&edd_ajax=true';
-		data += '&'+wpidea.nonce_name+'='+wpidea.nonce_value;
+		data += '&' + wpidea.nonce_name + '=' + wpidea.nonce_value;
 
 
-		$.post(wpidea.urls.payment_process_checkout, data, function(data) {
-			if ( $.trim(data) == 'success' ) {
+		$.post(wpidea.urls.payment_process_checkout, data, function (data) {
+			if ($.trim(data) == 'success') {
 				$('.edd_errors').remove();
 				$('.edd-error').hide();
+
+                insertHiddenInputWithButtonValue();
+
 				$(eddPurchaseform).submit();
 			} else {
-				$('#edd-purchase-button').val(complete_purchase_val);
+				let isButton = elementType === 'button';
+
 				$('.edd-cart-ajax').remove();
 				$('.edd_errors').remove();
 				$('.edd-error').hide();
 				$('#edd_purchase_submit').before(data);
-				$('#edd-purchase-button').prop( 'disabled', false );
+
+				if (isButton) {
+					button.html(complete_purchase_val);
+					button.prop('disabled', false);
+					return;
+				}
+
+				$('#edd-purchase-button').val(complete_purchase_val);
+				$('#edd-purchase-button').prop('disabled', false);
 			}
 		});
 
+		function insertHiddenInputWithButtonValue() {
+			let buttonName = button.attr('name');
+			let buttonValue = button.val();
+
+			if (buttonName && buttonValue && buttonValue.trim() !== '') {
+				$('<input>')
+					.attr({
+						type: 'hidden',
+						name: buttonName,
+						value: buttonValue
+					})
+					.appendTo($(eddPurchaseform));
+			}
+		}
 	});
 });
+
+function getButtonText(button, buttonType) {
+	if (buttonType === 'button') {
+		return button.html();
+	}
+
+	return button.val();
+}
+
+function setButtonText(button, buttonType, newText) {
+	if (buttonType === 'button') {
+		button.html(newText);
+		return;
+	}
+
+	button.val(newText);
+}
 
 function edd_load_gateway( payment_mode ) {
 
@@ -421,12 +479,15 @@ function edd_load_gateway( payment_mode ) {
 
 	// Show the ajax loader
 	jQuery('.edd-cart-ajax').show();
-	jQuery('#edd_purchase_form_wrap').html('<img src="' + edd_scripts.ajax_loader + '"/>');
+	jQuery('#edd_purchase_form_wrap').html('<img style="display:block; margin: 10px auto 0;"  src="' + edd_scripts.ajax_loader + '"/>');
 	var data = {
 		'edd_payment_mode': payment_mode,
 		'payment-mode': payment_mode,
 	};
 	data[wpidea.nonce_name] = wpidea.nonce_value;
+
+	jQuery("[class^='additional_gateway_info']").slideUp();
+	jQuery('.additional_gateway_info_' + payment_mode).slideDown();
 
 	jQuery.ajax({
 		type: "POST",
