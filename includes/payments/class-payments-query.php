@@ -292,10 +292,6 @@ class EDD_Payments_Query extends EDD_Stats {
 				$this->__set( 'orderby', 'meta_value_num' );
 				$this->__set( 'meta_key', '_edd_payment_total' );
 			break;
-			case 'payment_cycle' :
-			    $this->__set( 'orderby', 'meta_value_num' );
-			    $this->__set( 'meta_key', 'recurrent_sequence_number' );
-			    break;
 			default :
 				$this->__set( 'orderby', $this->args['orderby'] );
 			break;
