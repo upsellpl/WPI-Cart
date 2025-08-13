@@ -389,7 +389,6 @@ jQuery(document).ready(function ($) {
 			console.log('WP Idea not loaded!');
 			return;
 		}
-
 		var eddPurchaseform = document.getElementById('edd_purchase_form');
 		if (typeof eddPurchaseform.checkValidity === "function" && false === eddPurchaseform.checkValidity()) {
 			return;
@@ -400,14 +399,15 @@ jQuery(document).ready(function ($) {
 		let elementType = button.is('button') ? 'button' : 'input';
 
 		var complete_purchase_val = getButtonText(button, elementType);
+		const submit_selector = '#edd_purchase_form #edd_purchase_submit input[type=submit], #edd_purchase_form #edd_purchase_submit button[type=submit]';
 		setButtonText(button, elementType, edd_global_vars.purchase_loading);
-		button.prop('disabled', true);
+
+		$(submit_selector).prop('disabled', true);
 		button.after('<span class="edd-cart-ajax"><i class="edd-icon-spinner edd-icon-spin"></i></span>');
 
 		var data = $('#edd_purchase_form').serialize();
 		data += '&edd_ajax=true';
 		data += '&' + wpidea.nonce_name + '=' + wpidea.nonce_value;
-
 
 		$.post(wpidea.urls.payment_process_checkout, data, function (data) {
 			if ($.trim(data) == 'success') {
@@ -415,6 +415,16 @@ jQuery(document).ready(function ($) {
 				$('.edd-error').hide();
 
                 insertHiddenInputWithButtonValue();
+                const beforeSubmitEvent = new CustomEvent('wpi_checkout_before_form_submit', {
+                    bubbles: true,
+                    cancelable: true,
+                    detail: { form: this } 
+                });
+                document.dispatchEvent(beforeSubmitEvent);
+
+                if (beforeSubmitEvent.defaultPrevented) {
+                    return;
+                }
 
 				$(eddPurchaseform).submit();
 			} else {
@@ -423,16 +433,16 @@ jQuery(document).ready(function ($) {
 				$('.edd-cart-ajax').remove();
 				$('.edd_errors').remove();
 				$('.edd-error').hide();
-				$('#edd_purchase_submit').before(data);
+				$('#edd_final_total_wrap').before(data);
 
 				if (isButton) {
 					button.html(complete_purchase_val);
-					button.prop('disabled', false);
+					$(submit_selector).prop('disabled', false);
 					return;
 				}
 
 				$('#edd-purchase-button').val(complete_purchase_val);
-				$('#edd-purchase-button').prop('disabled', false);
+				$(submit_selector).prop('disabled', false);
 			}
 		});
 
