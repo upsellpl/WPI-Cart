@@ -144,7 +144,7 @@ function edd_update_payment_details( $data ) {
 	$updated       = $payment->save();
 
 	if ($previous_date !== $date) {
-		do_action('edd_payment_date_updated', $payment_id, $status, $date);
+		do_action('edd_payment_date_updated', $payment_id, $date, $status);
 	}
 
 	if ( 0 === $updated ) {
