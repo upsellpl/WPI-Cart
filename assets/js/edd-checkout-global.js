@@ -282,7 +282,6 @@ window.EDD_Checkout = (function($) {
 			},
             success: function (discount_response) {
                 if (discount_response.previous_total === 0) {
-                    $('#edd_payment_mode_select,.secure_payments').slideDown();
                     let selectedGateway = $('#edd-gateway option:selected, input.edd-gateway:checked').val();
 
                     if (selectedGateway === undefined) {
@@ -290,6 +289,7 @@ window.EDD_Checkout = (function($) {
                         return;
                     }
 
+                    $('#edd_payment_mode_select,.secure_payments').slideDown();
                     edd_load_gateway(selectedGateway);
                 }
 
