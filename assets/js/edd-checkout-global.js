@@ -238,7 +238,7 @@ window.EDD_Checkout = (function($) {
 
 							inputs.attr('required','required');
 							$('#edd_cc_fields,#edd_cc_address,#edd_payment_mode_select,.secure_payments').slideDown();
-							edd_load_gateway($('#edd-gateway option:selected, input.edd-gateway:checked').val());
+							edd_load_gateway($('#edd-gateway option:selected, input.edd-gateway').val());
 						}
 
 						$body.trigger('edd_discount_applied', [ discount_response ]);
@@ -282,8 +282,16 @@ window.EDD_Checkout = (function($) {
 			},
 			success: function (discount_response) {
 				if (discount_response.previous_total === 0) {
-					$('#edd_payment_mode_select,.secure_payments').slideDown();
-					edd_load_gateway($('#edd-gateway option:selected, input.edd-gateway:checked').val());
+                    const $gateway = $('#edd-gateway');
+
+                    if (!$gateway.length || !$gateway.is('select')) {
+                        window.location.reload();
+                        return;
+                    }
+
+                    $('#edd_payment_mode_select,.secure_payments').slideDown();
+                    let selectedGateway = $('#edd-gateway option:selected, input.edd-gateway').val();
+                    edd_load_gateway(selectedGateway);
 				}
 
 				var zero = '0' + edd_global_vars.decimal_separator + '00';
