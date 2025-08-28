@@ -280,11 +280,18 @@ window.EDD_Checkout = (function($) {
 			xhrFields: {
 				withCredentials: true
 			},
-			success: function (discount_response) {
-				if (discount_response.previous_total === 0) {
-					$('#edd_payment_mode_select,.secure_payments').slideDown();
-					edd_load_gateway($('#edd-gateway option:selected, input.edd-gateway:checked').val());
-				}
+            success: function (discount_response) {
+                if (discount_response.previous_total === 0) {
+                    let selectedGateway = $('#edd-gateway option:selected, input.edd-gateway:checked').val();
+
+                    if (selectedGateway === undefined) {
+                        window.location.reload();
+                        return;
+                    }
+
+                    $('#edd_payment_mode_select,.secure_payments').slideDown();
+                    edd_load_gateway(selectedGateway);
+                }
 
 				var zero = '0' + edd_global_vars.decimal_separator + '00';
 
