@@ -26,8 +26,12 @@ function edd_load_dashboard_sales_widget( ) {
 
 	$stats = new EDD_Payment_Stats;
 	$sales_report = apply_filters( 'get_sales_report_for_dashboard', [] );
+	$validity_json = json_encode($sales_report['validity']);
 
 	?>
+	<div id="pbg-validity-info" data-validity="<?php echo htmlentities($validity_json, ENT_QUOTES, 'UTF-8'); ?>">
+	</div>
+
 	<div class="edd_dashboard_widget">
 		<div class="table table_left table_current_month">
 			<table>
