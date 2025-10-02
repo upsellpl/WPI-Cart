@@ -315,10 +315,10 @@ function edd_purchase_form_validate_discounts() {
  */
 function edd_purchase_form_validate_agree_to_terms() {
 	// Validate agree to terms
-	if ( ! isset( $_POST['edd_agree_to_terms'] ) || $_POST['edd_agree_to_terms'] != 1 ) {
-		// User did not agree
-		edd_set_error( 'agree_to_terms', apply_filters( 'edd_agree_to_terms_text', __( 'You must agree to the terms of use', 'easy-digital-downloads' ) ) );
-	}
+//	if ( ! isset( $_POST['edd_agree_to_terms'] ) || $_POST['edd_agree_to_terms'] != 1 ) {
+//		// User did not agree
+//		edd_set_error( 'agree_to_terms', apply_filters( 'edd_agree_to_terms_text', __( 'You must agree to the terms of use', 'easy-digital-downloads' ) ) );
+//	}
 }
 
 /**
