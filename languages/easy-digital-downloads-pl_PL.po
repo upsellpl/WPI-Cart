@@ -3701,3 +3701,6 @@ msgstr "Aby użyć kodu zniżkowego wartość zamówienia musi wynosić co najmn
 #: includes/shortcodes.php:666
 msgid "You must be logged in to view this payment receipt."
 msgstr "Musisz się zalogować, aby zobaczyć to potwierdzenie zamówienia"
+
+msgid "Enter a valid price"
+msgstr "Podaj prawidłową cenę"

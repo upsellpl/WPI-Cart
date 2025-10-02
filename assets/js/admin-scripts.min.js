@@ -344,7 +344,6 @@ jQuery(document).ready(function ($) {
 			this.remove_download();
 			this.add_download();
 			this.new_customer();
-			this.recalculate_total();
 			this.variable_prices_check();
 			this.add_note();
 			this.remove_note();
@@ -379,6 +378,7 @@ jQuery(document).ready(function ($) {
 
 		remove_download : function() {
 
+			var _this = this;
 			// Remove a download from a purchase
 			$('#edd-purchased-files').on('click', '.edd-order-remove-download', function() {
 
@@ -413,7 +413,7 @@ jQuery(document).ready(function ($) {
 
 					// Flag the Downloads section as changed
 					$('#edd-payment-downloads-changed').val(1);
-					$('.edd-order-payment-recalc-totals').show();
+					_this.recalculate_total();
 				}
 				return false;
 			});
@@ -440,6 +440,7 @@ jQuery(document).ready(function ($) {
 
 		add_download : function() {
 
+			var _this = this;
 			// Add a New Download from the Add Downloads to Purchase Box
 			$('#edd-purchased-files').on('click', '#edd-order-add-download', function(e) {
 
@@ -453,7 +454,7 @@ jQuery(document).ready(function ($) {
 				var download_id    = order_download_select.val();
 				var download_title = order_download_select.find(':selected').text();
 				var quantity       = order_download_quantity.val();
-				var amount         = order_download_amount.val();
+				var amount         = order_download_amount.val().trim().replace(',', '.');
 				var price_id       = selected_price_option.val();
 				var price_name     = selected_price_option.text();
 
@@ -466,7 +467,7 @@ jQuery(document).ready(function ($) {
 				}
 
 				amount = parseFloat( amount );
-				if ( isNaN( amount ) ) {
+				if ( isNaN( amount ) || amount < 0) {
 					alert( edd_vars.numeric_item_price );
 					return false;
 				}
@@ -523,32 +524,25 @@ jQuery(document).ready(function ($) {
 				$('#edd-payment-downloads-changed').val(1);
 
 				$(clone).insertAfter( '#edd-purchased-files div.row:last' );
-				$( '.edd-order-payment-recalc-totals' ).show();
-
+				_this.recalculate_total();
 			});
 		},
 
 		recalculate_total : function() {
+			var total           = 0,
+			purchased_files = $( '#edd-purchased-files .row .edd-payment-details-download-amount' );
 
-			// Remove a download from a purchase
-			$('#edd-order-recalc-total').on('click', function(e) {
-				e.preventDefault();
-				var total           = 0,
-					purchased_files = $( '#edd-purchased-files .row .edd-payment-details-download-amount' );
-
-				if( purchased_files.length ) {
-					purchased_files.each(function() {
-						total += parseFloat( $(this).val() );
-					});
-				}
-				if( $('.edd-payment-fees').length ) {
-					$('.edd-payment-fees span.fee-amount').each(function() {
-						total += parseFloat( $(this).data('fee') );
-					});
-				}
-				$('input[name=edd-payment-total]').val( total.toFixed(edd_vars.currency_decimals));
-			});
-
+			if( purchased_files.length ) {
+				purchased_files.each(function() {
+					total += parseFloat( $(this).val() );
+				});
+			}
+			if( $('.edd-payment-fees').length ) {
+				$('.edd-payment-fees span.fee-amount').each(function() {
+					total += parseFloat( $(this).data('fee') );
+				});
+			}
+			$('input[name=edd-payment-total]').val( total.toFixed(edd_vars.currency_decimals));
 		},
 
 		variable_prices_check : function() {
