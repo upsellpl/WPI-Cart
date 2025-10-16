@@ -182,7 +182,7 @@ function edd_load_admin_scripts( $hook ) {
 	}
 
 	wp_register_script( 'edd-admin-scripts', $js_dir . 'admin-scripts' . $suffix . '.js', $admin_deps, EDD_VERSION, false );
-	wp_enqueue_script( 'edd-admin-scripts' );
+	wp_enqueue_script( 'edd-admin-scripts', args: 1 );
 
 	$edd_vars = [
 		'post_id'                 => isset( $post->ID ) ? $post->ID : null,
