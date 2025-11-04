@@ -23,6 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class EDD_Payment_Stats extends EDD_Stats {
 
+    private const TRANSIENT_OPTION_PREFIX = '_transient_timeout_';
+    private const TRANSIENT_TIMEOUT = HOUR_IN_SECONDS;
 
 	/**
 	 * Retrieve sale stats
@@ -152,7 +154,7 @@ class EDD_Payment_Stats extends EDD_Stats {
 
 				}
 				// Cache the results for one hour
-				set_transient( $key, $earnings, HOUR_IN_SECONDS );
+				set_transient( $key, $earnings, self::TRANSIENT_TIMEOUT );
 			}
 
 		} else {
@@ -211,7 +213,7 @@ class EDD_Payment_Stats extends EDD_Stats {
 				}
 
 				// Cache the results for one hour
-				set_transient( $key, $earnings, HOUR_IN_SECONDS );
+				set_transient( $key, $earnings, self::TRANSIENT_TIMEOUT );
 			}
 		}
 
@@ -221,6 +223,43 @@ class EDD_Payment_Stats extends EDD_Stats {
 
 	}
 
+	public function get_cache_validity( $start_date = false, $end_date = false, $include_taxes = true ): ?array {
+	    
+	    global $wpdb;
+	    $this->setup_dates( $start_date, $end_date );
+
+	    // Make sure start date is valid
+	    if( is_wp_error( $this->start_date ) )
+	        return null;
+
+        // Make sure end date is valid
+        if( is_wp_error( $this->end_date ) )
+            return null;
+
+        add_filter( 'posts_where', array( $this, 'payments_where' ) );
+
+        $args = array(
+            'post_type'              => 'edd_payment',
+            'nopaging'               => true,
+            'post_status'            => array( 'publish' ),
+            'fields'                 => 'ids',
+            'update_post_term_cache' => false,
+            'suppress_filters'       => false,
+            'start_date'             => $this->start_date, // These dates are not valid query args, but they are used for cache keys
+            'end_date'               => $this->end_date,
+            'edd_transient_type'     => 'edd_earnings', // This is not a valid query arg, but is used for cache keying
+            'include_taxes'          => $include_taxes,
+        );
+
+        $args     = apply_filters( 'edd_stats_earnings_args', $args );
+        $key      = 'edd_stats_' . substr( md5( serialize( $args ) ), 0, 15 );
+
+        $expiration = get_option( self::TRANSIENT_OPTION_PREFIX . $key );
+
+        remove_filter( 'posts_where', array( $this, 'payments_where' ) );
+        return ['create' => $expiration - self::TRANSIENT_TIMEOUT, 'expire' => $expiration];
+	}
+	
 	/**
 	 * Get the best selling products
 	 *
