@@ -347,11 +347,11 @@ function edd_show_gateways() {
  */
 function edd_get_chosen_gateway() {
 	$gateways = edd_get_enabled_payment_gateways();
-	$chosen   = isset( $_REQUEST['payment-mode'] ) ? $_REQUEST['payment-mode'] : false;
+	$chosen   = isset( $_REQUEST['payment-mode'] ) ? $_REQUEST['payment-mode'] : null;
 
-    $chosen = apply_filters('edd_chosen_gateway', $chosen ?: null);
+    $chosen = apply_filters('edd_chosen_gateway', $chosen);
 
-	if ( false !== $chosen ) {
+	if ( null !== $chosen ) {
 		$chosen = preg_replace('/[^a-zA-Z0-9-_]+/', '', $chosen );
 	}
 
