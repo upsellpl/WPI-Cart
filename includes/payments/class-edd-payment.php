@@ -548,7 +548,13 @@ final class EDD_Payment {
 			}
 
 			if ( empty( $customer->id ) ) {
+				$user = get_user_by( 'login', $this->email );
+				if ( $user instanceof WP_User ) {
+					$customer = new EDD_Customer( $user->ID, true );
+				}
+			}
 
+			if ( empty( $customer->id ) ) {
 				$customer_data = array(
 					'name'        => ! is_email( $payment_title ) ? $this->first_name . ' ' . $this->last_name : '',
 					'email'       => $this->email,
