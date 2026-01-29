@@ -508,7 +508,13 @@ function edd_load_gateway( payment_mode ) {
 			withCredentials: true
 		},
 		success: function (response) {
-			jQuery('#edd_purchase_form_wrap').html(response.form);
+            let form_wrap = jQuery('#edd_purchase_form_wrap');
+
+            if(form_wrap.length === 0) {
+                form_wrap = jQuery('#edd_purchase_form');
+            }
+
+			form_wrap.html(response.form);
 			jQuery('.edd-no-js').hide();
 			jQuery('body').trigger('edd_gateway_loaded', [ payment_mode ]);
 		},
