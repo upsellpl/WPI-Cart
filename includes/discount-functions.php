@@ -1374,7 +1374,7 @@ function edd_get_cart_discounts_html( $discounts = false ) {
 			edd_get_checkout_uri()
 		);
 
-		$html .= "<span class=\"edd_discount\">\n";
+		$html .= "<span class=\"pbg-discount-code-title\">" . __( 'Discount code', 'easy-digital-downloads' ) . ":</span> <span class=\"edd_discount\">\n";
 		$html .= "<span class=\"edd_discount_rate\">$discount&nbsp;&ndash;&nbsp;$rate (" . __( 'total discounts', 'easy-digital-downloads' ) . " $discounted_amount)</span>\n";
 			$html .= "<a href=\"$remove_url\" data-code=\"$discount\" class=\"edd_discount_remove\"></a>\n";
 		$html .= "</span>\n";

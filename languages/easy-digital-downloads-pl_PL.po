@@ -3707,3 +3707,6 @@ msgstr "Podaj prawidłową cenę"
 
 msgid "total discounts"
 msgstr "łącznie"
+
+msgid "Discount code"
+msgstr "Kod zniżkowy"
