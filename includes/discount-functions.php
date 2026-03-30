@@ -1363,6 +1363,7 @@ function edd_get_cart_discounts_html( $discounts = false ) {
 	foreach ( $discounts as $discount ) {
 		$discount_id  = edd_get_discount_id_by_code( $discount );
 		$rate         = edd_format_discount_rate( edd_get_discount_type( $discount_id ), edd_get_discount_amount( $discount_id ) );
+		$discounted_amount = edd_currency_filter( edd_format_amount( edd_get_cart_discounted_amount() ) );
 
 		$remove_url   = add_query_arg(
 			array(
@@ -1374,7 +1375,7 @@ function edd_get_cart_discounts_html( $discounts = false ) {
 		);
 
 		$html .= "<span class=\"edd_discount\">\n";
-			$html .= "<span class=\"edd_discount_rate\">$discount&nbsp;&ndash;&nbsp;$rate</span>\n";
+		$html .= "<span class=\"edd_discount_rate\">$discount&nbsp;&ndash;&nbsp;$rate (" . __( 'total discounts', 'easy-digital-downloads' ) . " $discounted_amount)</span>\n";
 			$html .= "<a href=\"$remove_url\" data-code=\"$discount\" class=\"edd_discount_remove\"></a>\n";
 		$html .= "</span>\n";
 	}

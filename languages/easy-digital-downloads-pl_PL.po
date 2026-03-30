@@ -3704,3 +3704,6 @@ msgstr "Musisz się zalogować, aby zobaczyć to potwierdzenie zamówienia"
 
 msgid "Enter a valid price"
 msgstr "Podaj prawidłową cenę"
+
+msgid "total discounts"
+msgstr "łącznie"
