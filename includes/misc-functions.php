@@ -135,13 +135,13 @@ function edd_string_is_image_url( $str ) {
 	$ext = edd_get_file_extension( $str );
 
 	switch ( strtolower( $ext ) ) {
-		case 'jpg';
+		case 'jpg':
 			$return = true;
 			break;
-		case 'png';
+		case 'png':
 			$return = true;
 			break;
-		case 'gif';
+		case 'gif':
 			$return = true;
 			break;
 		default:
