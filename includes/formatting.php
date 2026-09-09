@@ -56,7 +56,7 @@ function edd_sanitize_amount( $amount ) {
 	 * @param int|string $amount Price
 	 */
 	$decimals = apply_filters( 'edd_sanitize_amount_decimals', 2, $amount );
-	$amount   = number_format( (double) $amount, $decimals, '.', '' );
+	$amount   = number_format( (float) $amount, $decimals, '.', '' );
 
 	if( $is_negative ) {
 		$amount *= -1;
