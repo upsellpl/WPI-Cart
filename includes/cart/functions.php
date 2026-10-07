@@ -719,6 +719,8 @@ function edd_get_cart_total( $discounts = false ) {
 	if( $total < 0 )
 		$total = 0.00;
 
+	$total = round( $total, edd_currency_decimal_filter() );
+
 	return (float) apply_filters( 'edd_get_cart_total', $total );
 }
 

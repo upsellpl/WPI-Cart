@@ -1382,7 +1382,7 @@ final class EDD_Payment {
 	        	$total = 0;
 	        }
 
-		$this->total = $total;
+		$this->total = round( $total, edd_currency_decimal_filter() );
 	}
 
 	/**

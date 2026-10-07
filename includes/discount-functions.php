@@ -1008,6 +1008,8 @@ function edd_get_discounted_amount( $code, $base_price ) {
 
 	}
 
+	$amount = round( $amount, edd_currency_decimal_filter() );
+
 	return apply_filters( 'edd_discounted_amount', $amount );
 }
 
@@ -1327,7 +1329,7 @@ function edd_get_cart_item_discount_amount( $item = array() ) {
 
 	}
 
-	return $amount;
+	return round( $amount, edd_currency_decimal_filter() );
 
 }
 
