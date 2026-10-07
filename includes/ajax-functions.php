@@ -324,32 +324,6 @@ function edd_load_checkout_register_fields() {
 add_action('wp_ajax_nopriv_checkout_register', 'edd_load_checkout_register_fields');
 
 /**
- * Get Download Title via AJAX (used only in WordPress Admin)
- *
- * @since 1.0
- * @return void
- */
-function edd_ajax_get_download_title() {
-	if ( isset( $_POST['download_id'] ) ) {
-		$download_id = is_string( $_POST['download_id'] ) ? wp_unslash( $_POST['download_id'] ) : '';
-		if ( ! ctype_digit( $download_id ) || (int) $download_id < 1 ) {
-			echo 'fail';
-			edd_die();
-			return;
-		}
-		$title = get_the_title( (int) $download_id );
-		if ( $title ) {
-			echo esc_html( $title );
-		} else {
-			echo 'fail';
-		}
-	}
-	edd_die();
-}
-add_action( 'wp_ajax_edd_get_download_title', 'edd_ajax_get_download_title' );
-add_action( 'wp_ajax_nopriv_edd_get_download_title', 'edd_ajax_get_download_title' );
-
-/**
  * Recalculate cart taxes
  *
  * @since 1.6
