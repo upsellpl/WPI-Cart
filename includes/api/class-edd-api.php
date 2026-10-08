@@ -1842,7 +1842,7 @@ class EDD_API {
 				delete_transient( 'edd-total-api-keys' );
 				wp_redirect( add_query_arg( 'edd-message', 'api-key-revoked', 'edit.php?post_type=download&page=edd-tools&tab=api_keys' ) ); exit();
 				break;
-			default;
+			default:
 				break;
 		}
 	}
