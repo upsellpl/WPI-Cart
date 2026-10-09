@@ -134,7 +134,7 @@ function edd_options_page() {
 
 				// If the main section was empty and we overrode the view with the next subsection, prepare the section for saving
 				if ( true === $override ) {
-					?><input type="hidden" name="edd_section_override" value="<?php echo $section; ?>" /><?php
+					?><input type="hidden" name="edd_section_override" value="<?php echo esc_attr( $section ); ?>" /><?php
 				}
 				?>
 				</table>
