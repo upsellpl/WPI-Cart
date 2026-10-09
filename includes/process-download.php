@@ -138,9 +138,8 @@ function edd_process_download() {
 
 		nocache_headers();
 		header("Robots: none");
-		header("Content-Type: " . $ctype . "");
+		edd_send_download_headers( $ctype, apply_filters( 'edd_requested_file_name', basename( $requested_file ) ) );
 		header("Content-Description: File Transfer");
-		header("Content-Disposition: attachment; filename=\"" . apply_filters( 'edd_requested_file_name', basename( $requested_file ) ) . "\"");
 		header("Content-Transfer-Encoding: binary");
 
         $attachment_id = (int)$attachment_id;
@@ -693,7 +692,73 @@ function edd_get_file_ctype( $extension ) {
 		$ctype = 'application/octet-stream';
 	}
 
-	return apply_filters( 'edd_file_ctype', $ctype );
+	return edd_get_safe_download_content_type( apply_filters( 'edd_file_ctype', $ctype ) );
+}
+
+/**
+ * Keep active content from being interpreted when a file is downloaded.
+ *
+ * @param string $ctype Content type, including any values supplied by filters.
+ * @return string
+ */
+function edd_get_safe_download_content_type( $ctype ) {
+	$ctype = is_string( $ctype ) ? strtolower( trim( $ctype ) ) : '';
+	if ( ! preg_match( '/\A[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+\z/', $ctype ) ) {
+		return 'application/octet-stream';
+	}
+
+	if ( ( strpos( $ctype, 'text/' ) === 0 && ! in_array( $ctype, array( 'text/plain', 'text/csv' ), true ) )
+		|| substr( $ctype, -4 ) === '+xml'
+		|| in_array( $ctype, array( 'application/xml', 'application/javascript', 'application/ecmascript', 'application/x-javascript' ), true ) ) {
+		return 'application/octet-stream';
+	}
+
+	return $ctype;
+}
+
+/**
+ * Establish a download response before sending any file bytes.
+ *
+ * With no filename, preserve an existing attachment header prepared by the
+ * download process. Direct callers receive a generic attachment response.
+ *
+ * @param string|null $ctype Content type, or null to use the current response.
+ * @param string|null $filename Filename after the requested filename filter.
+ * @return bool False if headers have already been sent.
+ */
+function edd_send_download_headers( $ctype = null, $filename = null ) {
+	if ( headers_sent() ) {
+		return false;
+	}
+
+	$has_attachment = false;
+	foreach ( headers_list() as $response_header ) {
+		if ( $ctype === null && stripos( $response_header, 'Content-Type:' ) === 0 ) {
+			$ctype = trim( substr( $response_header, strlen( 'Content-Type:' ) ) );
+		}
+		if ( preg_match( '/\AContent-Disposition:\s*attachment(?:\s*;|\s*\z)/i', $response_header ) ) {
+			$has_attachment = true;
+		}
+	}
+
+	header( 'Content-Type: ' . edd_get_safe_download_content_type( $ctype ) );
+	header( 'X-Content-Type-Options: nosniff' );
+
+	if ( $filename !== null ) {
+		$filename = is_string( $filename ) ? $filename : '';
+		$filename = basename( str_replace( '\\', '/', $filename ) );
+		$filename = preg_replace( '/[\x00-\x1F\x7F]/', '', $filename );
+		if ( $filename === '' || $filename === '.' || $filename === '..' ) {
+			$filename = 'download';
+		}
+		$fallback = preg_replace( '/[^\x20-\x7E]/', '_', $filename );
+		$fallback = addcslashes( $fallback, '\\"' );
+		header( 'Content-Disposition: attachment; filename="' . $fallback . '"; filename*=UTF-8\'\'' . rawurlencode( $filename ) );
+	} elseif ( ! $has_attachment ) {
+		header( 'Content-Disposition: attachment' );
+	}
+
+	return true;
 }
 
 /**
@@ -706,6 +771,10 @@ function edd_get_file_ctype( $extension ) {
  * @return   bool|string        If string, $status || $cnt
  */
 function edd_readfile_chunked( $file, $retbytes = true ) {
+
+	if ( ! edd_send_download_headers() ) {
+		return false;
+	}
 
 	$chunksize = 1024 * 1024;
 	$buffer    = '';
