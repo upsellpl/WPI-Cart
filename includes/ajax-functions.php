@@ -324,26 +324,6 @@ function edd_load_checkout_register_fields() {
 add_action('wp_ajax_nopriv_checkout_register', 'edd_load_checkout_register_fields');
 
 /**
- * Get Download Title via AJAX (used only in WordPress Admin)
- *
- * @since 1.0
- * @return void
- */
-function edd_ajax_get_download_title() {
-	if ( isset( $_POST['download_id'] ) ) {
-		$title = get_the_title( $_POST['download_id'] );
-		if ( $title ) {
-			echo $title;
-		} else {
-			echo 'fail';
-		}
-	}
-	edd_die();
-}
-add_action( 'wp_ajax_edd_get_download_title', 'edd_ajax_get_download_title' );
-add_action( 'wp_ajax_nopriv_edd_get_download_title', 'edd_ajax_get_download_title' );
-
-/**
  * Recalculate cart taxes
  *
  * @since 1.6
@@ -385,17 +365,27 @@ add_action( 'wp_ajax_nopriv_edd_recalculate_taxes', 'edd_ajax_recalculate_taxes'
  * @return void
  */
 function edd_ajax_get_states_field() {
-	if( empty( $_POST['country'] ) ) {
-		$_POST['country'] = edd_get_shop_country();
+	if ( ( isset( $_POST['country'] ) && ! is_string( $_POST['country'] ) )
+		|| ! isset( $_POST['field_name'] ) || ! is_string( $_POST['field_name'] ) ) {
+		echo 'nostates';
+		edd_die();
+		return;
 	}
-	$states = edd_get_shop_states( $_POST['country'] );
+	$country = empty( $_POST['country'] ) ? edd_get_shop_country() : sanitize_text_field( wp_unslash( $_POST['country'] ) );
+	$field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
+	if ( '' === $field_name ) {
+		echo 'nostates';
+		edd_die();
+		return;
+	}
+	$states = edd_get_shop_states( $country );
 
 	if( ! empty( $states ) ) {
 
 		$args = array(
-			'name'    => $_POST['field_name'],
-			'id'      => $_POST['field_name'],
-			'class'   => $_POST['field_name'] . '  edd-select',
+			'name'    => $field_name,
+			'id'      => $field_name,
+			'class'   => $field_name . '  edd-select',
 			'options' => $states,
 			'show_option_all'  => false,
 			'show_option_none' => false
@@ -408,7 +398,19 @@ function edd_ajax_get_states_field() {
 		$response = 'nostates';
 	}
 
-	echo $response;
+	// Preserve the dropdown markup while allowing only the attributes used here.
+	echo wp_kses( $response, array(
+		'select' => array(
+			'name'             => true,
+			'id'               => true,
+			'class'            => true,
+			'data-placeholder' => true,
+		),
+		'option' => array(
+			'value'    => true,
+			'selected' => true,
+		),
+	) );
 
 	edd_die();
 }
