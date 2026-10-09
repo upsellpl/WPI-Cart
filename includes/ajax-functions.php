@@ -378,6 +378,7 @@ function edd_ajax_get_states_field() {
 		edd_die();
 		return;
 	}
+	$field_name = htmlspecialchars( $field_name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );
 	$states = edd_get_shop_states( $country );
 
 	if( ! empty( $states ) ) {
