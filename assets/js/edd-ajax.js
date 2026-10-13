@@ -324,6 +324,8 @@ jQuery(document).ready(function ($) {
 		$(this).after('<span class="edd-cart-ajax"><i class="edd-icon-spinner edd-icon-spin"></i></span>');
 
 		var data = $('#edd_purchase_form').serialize();
+		// jQuery.serialize() skips submit inputs, so signal the login submit manually
+		data += '&edd_login_submit=' + encodeURIComponent(complete_purchase_val);
 		data += '&edd_ajax=true';
 		data += '&' + wpidea.nonce_name + '=' + wpidea.nonce_value;
 
