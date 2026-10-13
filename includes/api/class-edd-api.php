@@ -146,6 +146,8 @@ class EDD_API {
 			require_once EDD_PLUGIN_DIR . 'includes/api/class-edd-api-' . $version . '.php';
 		}
 
+		add_action( 'init',                     array( $this, 'block_public_request' ), 0 );
+		add_action( 'parse_request',            array( $this, 'block_parsed_request' ), 0 );
 		add_action( 'init',                     array( $this, 'add_endpoint'     ) );
 		add_action( 'wp',                       array( $this, 'process_query'    ), -1 );
 		add_filter( 'query_vars',               array( $this, 'query_vars'       ) );
@@ -167,6 +169,49 @@ class EDD_API {
 		// Setup EDD_Stats instance
 		$this->stats = new EDD_Payment_Stats;
 
+	}
+
+	public function block_public_request() {
+		if ( array_key_exists( 'edd-api', $_GET ) || array_key_exists( 'edd-api', $_POST ) ) {
+			$this->deny_public_request();
+		}
+
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return;
+		}
+
+		$request   = explode( '?', $_SERVER['REQUEST_URI'], 2 );
+		$path      = rawurldecode( $request[0] );
+		$home_path = parse_url( home_url( '/' ), PHP_URL_PATH );
+		$home_path = is_string( $home_path ) ? rtrim( $home_path, '/' ) : '';
+
+		if ( $home_path !== '' ) {
+			if ( strpos( $path, $home_path . '/' ) !== 0 ) {
+				return;
+			}
+			$path = substr( $path, strlen( $home_path ) );
+		}
+
+		if ( preg_match( '#^/+(?:index\.php/+)?edd-api(?:/|$)#', $path ) ) {
+			$this->deny_public_request();
+		}
+	}
+
+	public function block_parsed_request( $wp ) {
+		if ( array_key_exists( 'edd-api', $wp->query_vars ) ) {
+			$this->deny_public_request();
+		}
+	}
+
+	private function deny_public_request() {
+		status_header( 403 );
+		nocache_headers();
+		header( 'Content-Type: text/plain; charset=UTF-8' );
+
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'HEAD' ) {
+			echo 'Forbidden';
+		}
+		exit;
 	}
 
 	/**
