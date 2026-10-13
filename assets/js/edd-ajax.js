@@ -289,61 +289,6 @@ jQuery(document).ready(function ($) {
 		return false;
 	});
 
-	// Show the login form on the checkout page
-	$('#edd_checkout_form_wrap').on('click', '.edd_checkout_register_login', function () {
-		var $this = $(this),
-			data = {
-				action: $this.data('action')
-			};
-		// Show the ajax loader
-		$('.edd-cart-ajax').show();
-
-		$.post(edd_scripts.ajaxurl, data, function (checkout_response) {
-			$('#edd_checkout_login_register').html(edd_scripts.loading);
-			$('#edd_checkout_login_register').html(checkout_response);
-			// Hide the ajax loader
-			$('.edd-cart-ajax').hide();
-		});
-		return false;
-	});
-
-	// Process the login form via ajax
-	$(document).on('click', '#edd_purchase_form #edd_login_fields input[type=submit]', function(e) {
-
-		e.preventDefault();
-
-		if (!is_wpidea_loaded) {
-			console.log('WP Idea not loaded!');
-			return;
-		}
-
-		var complete_purchase_val = $(this).val();
-
-		$(this).val(edd_global_vars.purchase_loading);
-
-		$(this).after('<span class="edd-cart-ajax"><i class="edd-icon-spinner edd-icon-spin"></i></span>');
-
-		var data = $('#edd_purchase_form').serialize();
-		// jQuery.serialize() skips submit inputs, so signal the login submit manually
-		data += '&edd_login_submit=' + encodeURIComponent(complete_purchase_val);
-		data += '&edd_ajax=true';
-		data += '&' + wpidea.nonce_name + '=' + wpidea.nonce_value;
-
-		$.post(wpidea.urls.payment_process_checkout, data, function(data) {
-
-			if ( $.trim(data) == 'success' ) {
-				$('.edd_errors').remove();
-				window.location = edd_scripts.checkout_page;
-			} else {
-				$('#edd_login_fields input[type=submit]').val(complete_purchase_val);
-				$('.edd-cart-ajax').remove();
-				$('.edd_errors').remove();
-				$('#edd-user-login-submit').before(data);
-			}
-		});
-
-	});
-
 	// Load the fields for the selected payment method
 	$('select#edd-gateway, input.edd-gateway').change( function (e) {
 

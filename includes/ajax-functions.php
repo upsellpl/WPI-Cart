@@ -300,18 +300,6 @@ add_action( 'wp_ajax_edd_remove_discount', 'edd_ajax_remove_discount' );
 add_action( 'wp_ajax_nopriv_edd_remove_discount', 'edd_ajax_remove_discount' );
 
 /**
- * Loads Checkout Login Fields the via AJAX
- *
- * @since 1.0
- * @return void
- */
-function edd_load_checkout_login_fields() {
-	do_action( 'edd_purchase_form_login_fields' );
-	edd_die();
-}
-add_action('wp_ajax_nopriv_checkout_login', 'edd_load_checkout_login_fields');
-
-/**
  * Load Checkout Register Fields via AJAX
  *
  * @since 1.0
