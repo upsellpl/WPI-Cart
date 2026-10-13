@@ -124,38 +124,6 @@ function edd_process_purchase_form() {
 }
 add_action( 'edd_purchase', 'edd_process_purchase_form' );
 
-/**`
- * Process the checkout login form
- *
- * @access      private
- * @since       1.8
- * @return      void
- */
-function edd_process_purchase_login() {
-
-	$is_ajax = isset( $_POST['edd_ajax'] );
-
-	$user_data = edd_purchase_form_validate_user_login();
-
-	if ( edd_get_errors() || $user_data['user_id'] < 1 ) {
-		if ( $is_ajax ) {
-			do_action( 'edd_ajax_checkout_errors' );
-			edd_die();
-		} else {
-			wp_redirect( $_SERVER['HTTP_REFERER'] ); exit;
-		}
-	}
-
-	edd_log_user_in( $user_data['user_id'], $user_data['user_login'], $user_data['user_pass'] );
-
-	if ( $is_ajax ) {
-		echo 'success';
-		edd_die();
-	} else {
-		wp_redirect( edd_get_checkout_uri( $_SERVER['QUERY_STRING'] ) );
-	}
-}
-
 /**
  * Purchase Form Validate Fields
  *
@@ -697,7 +665,6 @@ function edd_get_purchase_form_user( $valid_data = array() ) {
 			// User login
 		} else if ( $valid_data['need_user_login'] === true  && ! $is_ajax ) {
 			/*
-			 * The login form is now processed in the edd_process_purchase_login() function.
 			 * This is still here for backwards compatibility.
 			 * This also allows the old login process to still work if a user removes the
 			 * checkout login submit button.
