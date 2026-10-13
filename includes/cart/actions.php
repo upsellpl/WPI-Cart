@@ -12,49 +12,6 @@
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-/**
- * Register Endpoints for the Cart
- *
- * These endpoints are used for adding/removing items from the cart
- *
- * @since 1.3.4
- * @return void
- */
-function edd_add_rewrite_endpoints( $rewrite_rules ) {
-	add_rewrite_endpoint( 'edd-add', EP_ALL );
-	add_rewrite_endpoint( 'edd-remove', EP_ALL );
-}
-add_action( 'init', 'edd_add_rewrite_endpoints' );
-
-/**
- * Process Cart Endpoints
- *
- * Listens for add/remove requests sent from the cart
- *
- * @since 1.3.4
- * @global $wp_query Used to access the current query that is being requested
- * @return void
-*/
-function edd_process_cart_endpoints() {
-	global $wp_query;
-
-	// Adds an item to the cart with a /edd-add/# URL
-	if ( isset( $wp_query->query_vars['edd-add'] ) ) {
-		$download_id = absint( $wp_query->query_vars['edd-add'] );
-		$cart        = edd_add_to_cart( $download_id, array() );
-
-		wp_redirect( edd_get_checkout_uri() ); edd_die();
-	}
-
-	// Removes an item from the cart with a /edd-remove/# URL
-	if ( isset( $wp_query->query_vars['edd-remove'] ) ) {
-		$cart_key = absint( $wp_query->query_vars['edd-remove'] );
-		$cart     = edd_remove_from_cart( $cart_key );
-
-		wp_redirect( edd_get_checkout_uri() ); edd_die();
-	}
-}
-add_action( 'template_redirect', 'edd_process_cart_endpoints', 100 );
 
 /**
  * Process the Add to Cart request
