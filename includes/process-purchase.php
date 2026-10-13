@@ -39,11 +39,6 @@ function edd_process_purchase_form() {
 
 	$is_ajax = isset( $_POST['edd_ajax'] );
 
-	// Process the login form
-	if ( isset( $_POST['edd_login_submit'] ) ) {
-		edd_process_purchase_login();
-	}
-
 	// Validate the user
 	$user = edd_get_purchase_form_user( $valid_data );
 
