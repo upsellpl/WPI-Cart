@@ -312,20 +312,22 @@ jQuery(document).ready(function ($) {
 
 		e.preventDefault();
 
+		if (!is_wpidea_loaded) {
+			console.log('WP Idea not loaded!');
+			return;
+		}
+
 		var complete_purchase_val = $(this).val();
 
 		$(this).val(edd_global_vars.purchase_loading);
 
 		$(this).after('<span class="edd-cart-ajax"><i class="edd-icon-spinner edd-icon-spin"></i></span>');
 
-		var data = {
-			action : 'edd_process_checkout_login',
-			edd_ajax : 1,
-			edd_user_login : $('#edd_login_fields #edd_user_login').val(),
-			edd_user_pass : $('#edd_login_fields #edd_user_pass').val()
-		};
+		var data = $('#edd_purchase_form').serialize();
+		data += '&edd_ajax=true';
+		data += '&' + wpidea.nonce_name + '=' + wpidea.nonce_value;
 
-		$.post(edd_global_vars.ajaxurl, data, function(data) {
+		$.post(wpidea.urls.payment_process_checkout, data, function(data) {
 
 			if ( $.trim(data) == 'success' ) {
 				$('.edd_errors').remove();

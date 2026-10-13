@@ -128,8 +128,6 @@ function edd_process_purchase_form() {
 	edd_die();
 }
 add_action( 'edd_purchase', 'edd_process_purchase_form' );
-add_action( 'wp_ajax_edd_process_checkout', 'edd_process_purchase_form' );
-add_action( 'wp_ajax_nopriv_edd_process_checkout', 'edd_process_purchase_form' );
 
 /**`
  * Process the checkout login form
@@ -162,8 +160,6 @@ function edd_process_purchase_login() {
 		wp_redirect( edd_get_checkout_uri( $_SERVER['QUERY_STRING'] ) );
 	}
 }
-add_action( 'wp_ajax_edd_process_checkout_login', 'edd_process_purchase_login' );
-add_action( 'wp_ajax_nopriv_edd_process_checkout_login', 'edd_process_purchase_login' );
 
 /**
  * Purchase Form Validate Fields
