@@ -289,57 +289,6 @@ jQuery(document).ready(function ($) {
 		return false;
 	});
 
-	// Show the login form on the checkout page
-	$('#edd_checkout_form_wrap').on('click', '.edd_checkout_register_login', function () {
-		var $this = $(this),
-			data = {
-				action: $this.data('action')
-			};
-		// Show the ajax loader
-		$('.edd-cart-ajax').show();
-
-		$.post(edd_scripts.ajaxurl, data, function (checkout_response) {
-			$('#edd_checkout_login_register').html(edd_scripts.loading);
-			$('#edd_checkout_login_register').html(checkout_response);
-			// Hide the ajax loader
-			$('.edd-cart-ajax').hide();
-		});
-		return false;
-	});
-
-	// Process the login form via ajax
-	$(document).on('click', '#edd_purchase_form #edd_login_fields input[type=submit]', function(e) {
-
-		e.preventDefault();
-
-		var complete_purchase_val = $(this).val();
-
-		$(this).val(edd_global_vars.purchase_loading);
-
-		$(this).after('<span class="edd-cart-ajax"><i class="edd-icon-spinner edd-icon-spin"></i></span>');
-
-		var data = {
-			action : 'edd_process_checkout_login',
-			edd_ajax : 1,
-			edd_user_login : $('#edd_login_fields #edd_user_login').val(),
-			edd_user_pass : $('#edd_login_fields #edd_user_pass').val()
-		};
-
-		$.post(edd_global_vars.ajaxurl, data, function(data) {
-
-			if ( $.trim(data) == 'success' ) {
-				$('.edd_errors').remove();
-				window.location = edd_scripts.checkout_page;
-			} else {
-				$('#edd_login_fields input[type=submit]').val(complete_purchase_val);
-				$('.edd-cart-ajax').remove();
-				$('.edd_errors').remove();
-				$('#edd-user-login-submit').before(data);
-			}
-		});
-
-	});
-
 	// Load the fields for the selected payment method
 	$('select#edd-gateway, input.edd-gateway').change( function (e) {
 
