@@ -25,7 +25,7 @@ function edd_get_actions() {
 
 		// Purchases must only be processed via the POSTed checkout and buy-now forms.
 		if ( 'purchase' === $_GET['edd_action'] || 'straight_to_gateway' === $_GET['edd_action'] ) {
-			wp_die( __( 'This action is not allowed via GET.', 'easy-digital-downloads' ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
+			wp_die( __( 'This action is not allowed.', 'easy-digital-downloads' ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
 		}
 
 		do_action( 'edd_' . $_GET['edd_action'], $_GET );
