@@ -176,4 +176,4 @@ function edd_process_register_form( $data ) {
 		edd_die();
 	}
 }
-add_action( 'edd_user_register', 'edd_process_register_form' );
+//add_action( 'edd_user_register', 'edd_process_register_form' );

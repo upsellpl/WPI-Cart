@@ -300,18 +300,6 @@ add_action( 'wp_ajax_edd_remove_discount', 'edd_ajax_remove_discount' );
 add_action( 'wp_ajax_nopriv_edd_remove_discount', 'edd_ajax_remove_discount' );
 
 /**
- * Loads Checkout Login Fields the via AJAX
- *
- * @since 1.0
- * @return void
- */
-function edd_load_checkout_login_fields() {
-	do_action( 'edd_purchase_form_login_fields' );
-	edd_die();
-}
-add_action('wp_ajax_nopriv_checkout_login', 'edd_load_checkout_login_fields');
-
-/**
  * Load Checkout Register Fields via AJAX
  *
  * @since 1.0
@@ -416,81 +404,6 @@ function edd_ajax_get_states_field() {
 }
 add_action( 'wp_ajax_edd_get_shop_states', 'edd_ajax_get_states_field' );
 add_action( 'wp_ajax_nopriv_edd_get_shop_states', 'edd_ajax_get_states_field' );
-
-/**
- * Retrieve a states drop down
- *
- * @since 1.6
- * @return void
- */
-function edd_ajax_download_search() {
-	global $wpdb;
-
-	$search   = esc_sql( sanitize_text_field( $_GET['s'] ) );
-	$excludes = ( isset( $_GET['current_id'] ) ? (array) $_GET['current_id'] : array() );
-
-	$no_bundles = isset( $_GET['no_bundles'] ) ? filter_var( $_GET['no_bundles'], FILTER_VALIDATE_BOOLEAN ) : false;
-	if( true === $no_bundles ) {
-		$bundles  = $wpdb->get_results( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_edd_product_type' AND meta_value = 'bundle';", ARRAY_A );
-		$bundles  = wp_list_pluck( $bundles, 'post_id' );
-		$excludes = array_merge( $excludes, $bundles );
-	}
-
-	$excludes = array_unique( array_map( 'absint', $excludes ) );
-	$exclude  = implode( ",", $excludes );
-
-	$results = array();
-
-	// Setup the SELECT statement
-	$select = "SELECT ID,post_title FROM $wpdb->posts ";
-
-	// Setup the WHERE clause
-	$where = "WHERE `post_type` = 'download' and `post_title` LIKE '%s' ";
-
-	// If we have items to exclude, exclude them
-	if( ! empty( $exclude ) ) {
-		$where .= "AND `ID` NOT IN (" . $exclude . ") ";
-	}
-
-	// If the user can't edit products, limit to just published items
-	if( ! current_user_can( 'edit_products' ) ) {
-		$where .= "AND `post_status` = 'publish' ";
-	}
-
-	// Limit the result sets
-	$limit = "LIMIT 50";
-
-	$sql = $select . $where . $limit;
-
-	$prepared_statement = $wpdb->prepare( $sql, '%' . $search . '%' );
-
-	$items = $wpdb->get_results( $prepared_statement );
-
-	if( $items ) {
-
-		foreach( $items as $item ) {
-
-			$results[] = array(
-				'id'   => $item->ID,
-				'name' => $item->post_title
-			);
-		}
-
-	} else {
-
-		$items[] = array(
-			'id'   => 0,
-			'name' => __( 'No results found', 'easy-digital-downloads' )
-		);
-
-	}
-
-	echo json_encode( $results );
-
-	edd_die();
-}
-add_action( 'wp_ajax_edd_download_search', 'edd_ajax_download_search' );
-add_action( 'wp_ajax_nopriv_edd_download_search', 'edd_ajax_download_search' );
 
 /**
  * Search the customers database via Ajax
