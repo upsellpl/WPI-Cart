@@ -276,7 +276,17 @@ jQuery(document).ready(function ($) {
 				}
 			},
 			error: function ( jqXHR, textStatus, errorThrown ) {
-				console.log('Error: ' + jqXHR.responseJSON.error_message)
+				var errorMessage = jqXHR.responseJSON && jqXHR.responseJSON.error_message ? jqXHR.responseJSON.error_message : '';
+				if ( errorMessage ) {
+					console.log('Error: ' + errorMessage);
+				}
+
+				if ( errorMessage && window.snackbar && typeof window.snackbar.show === 'function' ) {
+					window.snackbar.show( errorMessage, 'error' );
+				}
+
+				$this.prop( 'disabled', false );
+				$this.removeAttr( 'data-edd-loading' );
 			},
 		}).fail(function (response) {
 			if ( window.console && window.console.log ) {
