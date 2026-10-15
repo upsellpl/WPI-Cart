@@ -265,9 +265,20 @@ function edd_field_is_required( $field = '' ) {
  * @return      array
  */
 function edd_get_banned_emails() {
-	$emails = array_map( 'trim', edd_get_option( 'banned_emails', array() ) );
+	$emails = edd_get_option( 'banned_emails', array() );
+	$emails = is_array( $emails ) ? $emails : array();
 
-	return apply_filters( 'edd_get_banned_emails', $emails );
+	foreach( $emails as $id => $email ) {
+		if( ! is_string( $email ) || '' === trim( $email ) ) {
+			unset( $emails[$id] );
+		} else {
+			$emails[$id] = trim( $email );
+		}
+	}
+
+	$emails = apply_filters( 'edd_get_banned_emails', $emails );
+
+	return is_array( $emails ) ? $emails : array();
 }
 
 /**
@@ -278,7 +289,7 @@ function edd_get_banned_emails() {
  */
 function edd_is_email_banned( $email = '' ) {
 
-	if( empty( $email ) ) {
+	if( ! is_string( $email ) || ! is_email( trim( $email ) ) ) {
 		return false;
 	}
 
@@ -288,11 +299,20 @@ function edd_is_email_banned( $email = '' ) {
 		return false;
 	}
 
+	$ret = false;
+	$domain = strtolower( substr( trim( $email ), strrpos( trim( $email ), '@' ) + 1 ) );
+
 	foreach( $banned_emails as $banned_email ) {
+		if( ! is_string( $banned_email ) ) {
+			continue;
+		}
+		$banned_email = trim( $banned_email );
+
 		if( is_email( $banned_email ) ) {
 			$ret = ( $banned_email == trim( $email ) ? true : false );
-		} else {
-			$ret = ( stristr( trim( $email ), $banned_email ) ? true : false );
+		} elseif( isset( $banned_email[0] ) && '@' === $banned_email[0] && is_email( 'user' . $banned_email ) ) {
+			$banned_domain = strtolower( substr( $banned_email, 1 ) );
+			$ret = ( $domain === $banned_domain || substr( $domain, -strlen( '.' . $banned_domain ) ) === '.' . $banned_domain );
 		}
 
 		if( true === $ret ) {

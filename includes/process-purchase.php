@@ -998,7 +998,7 @@ function edd_check_purchase_email( $valid_data, $posted ) {
 
 	if( $is_banned ) {
 		// Set an error and give the customer a general error (don't alert them that they were banned)
-		edd_set_error( 'email_banned', __( 'An internal error has occurred, please try again or contact support.', 'easy-digital-downloads' ) );
+		edd_set_error( 'checkout_unavailable', __( 'An internal error has occurred, please try again or contact support.', 'easy-digital-downloads' ) );
 	}
 }
 add_action( 'edd_checkout_error_checks', 'edd_check_purchase_email', 10, 2 );
