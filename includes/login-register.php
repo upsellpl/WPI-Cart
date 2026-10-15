@@ -39,50 +39,6 @@ function edd_register_form( $redirect = '' ) {
 	return apply_filters( 'edd_register_form', ob_get_clean() );
 }
 
-/**
- * Process Login Form
- *
- * @since 1.0
- * @param array $data Data sent from the login form
- * @return void
-*/
-function edd_process_login_form( $data ) {
-
-	if ( wp_verify_nonce( $data['edd_login_nonce'], 'edd-login-nonce' ) ) {
-
-		if ( !isset( $data['edd_user_login'] ) || !is_string( $data['edd_user_login'] ) ) {
-            return;
-        }
-
-		$user_data = get_user_by( 'login', $data['edd_user_login'] );
-
-		if ( ! $user_data ) {
-			$user_data = get_user_by( 'email', $data['edd_user_login'] );
-		}
-
-		if ( $user_data ) {
-			$user_ID = $user_data->ID;
-			$user_email = $user_data->user_email;
-			if ( wp_check_password( $data['edd_user_pass'], $user_data->user_pass, $user_data->ID ) ) {
-				edd_log_user_in( $user_data->ID, $data['edd_user_login'], $data['edd_user_pass'] );
-			} else {
-				edd_set_error( 'password_incorrect', __( 'The password you entered is incorrect', 'easy-digital-downloads' ) );
-			}
-		} else {
-			edd_set_error( 'username_incorrect', __( 'The username you entered does not exist', 'easy-digital-downloads' ) );
-		}
-
-		// Check for errors and redirect if none present
-		$errors = edd_get_errors();
-
-		if ( ! $errors ) {
-			$redirect = apply_filters( 'edd_login_redirect', $data['edd_redirect'], $user_ID );
-			wp_redirect( $redirect );
-			edd_die();
-		}
-	}
-}
-add_action( 'edd_user_login', 'edd_process_login_form' );
 
 /**
  * Log User In
