@@ -14,33 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 
 /**
- * Registration Form
- *
- * @since 2.0
- * @global $post
- * @param string $redirect Redirect page URL
- * @return string Register form
-*/
-function edd_register_form( $redirect = '' ) {
-	global $edd_register_redirect;
-
-	if ( empty( $redirect ) ) {
-		$redirect = edd_get_current_page_url();
-	}
-
-	$edd_register_redirect = $redirect;
-
-	ob_start();
-
-	if( ! is_user_logged_in() ) {
-		edd_get_template_part( 'shortcode', 'register' );
-	}
-
-	return apply_filters( 'edd_register_form', ob_get_clean() );
-}
-
-
-/**
  * Log User In
  *
  * @since 1.0
