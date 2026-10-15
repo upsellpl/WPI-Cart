@@ -48,13 +48,6 @@ class EDD_Download {
 	private $files;
 
 	/**
-	 * The download's file download limit
-	 *
-	 * @since 2.2
-	 */
-	private $file_download_limit;
-
-	/**
 	 * The download type, default or bundle
 	 *
 	 * @since 2.2
@@ -430,33 +423,11 @@ class EDD_Download {
 	 *
 	 * @since 2.2
 	 * @return int Number of download limit
+	 * @deprecated File download logging and count limits are retired in WPI-Cart.
 	 */
 	public function get_file_download_limit() {
-
-		if( ! isset( $this->file_download_limit ) ) {
-
-			$ret    = 0;
-			$limit  = get_post_meta( $this->ID, '_edd_download_limit', true );
-			$global = edd_get_option( 'file_download_limit', 0 );
-
-			if ( ! empty( $limit ) || ( is_numeric( $limit ) && (int)$limit == 0 ) ) {
-
-				// Download specific limit
-				$ret = absint( $limit );
-
-			} else {
-
-				// Global limit
-				$ret = strlen( $limit ) == 0  || $global ? $global : 0;
-
-			}
-
-			$this->file_download_limit = $ret;
-
-		}
-
-		return absint( apply_filters( 'edd_file_download_limit', $this->file_download_limit, $this->ID ) );
-
+		// Retired in WPI-Cart; retained for extension compatibility.
+		return 0;
 	}
 
 	/**

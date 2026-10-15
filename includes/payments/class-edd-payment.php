@@ -277,12 +277,12 @@ final class EDD_Payment {
 	protected $cart_details = array();
 
 	/**
-	 * Allows the files for this payment to be downloaded unlimited times (when download limits are enabled)
+	 * Compatibility property: file download count limits have been retired.
 	 *
 	 * @since  2.5
 	 * @var boolean
 	 */
-	protected $has_unlimited_downloads = false;
+	protected $has_unlimited_downloads = true;
 
 	/**
 	 * Array of items that have changed since the last save() was run
@@ -349,6 +349,11 @@ final class EDD_Payment {
 	 * @param mixed $value  The value of the property
 	 */
 	public function __set( $key, $value ) {
+		if ( 'has_unlimited_downloads' === $key ) {
+			// Downloads are always unlimited; ignore the retired setting.
+			return;
+		}
+
 		$ignore = array( 'downloads', 'cart_details', 'fees', '_ID' );
 
 		if ( $key === 'status' ) {
@@ -790,7 +795,7 @@ final class EDD_Payment {
 						break;
 
 					case 'has_unlimited_downloads':
-						$this->update_meta( '_edd_payment_unlimited_downloads', $this->has_unlimited_downloads );
+						// Retired setting: do not persist download limits.
 						break;
 
 					case 'parent_payment':
@@ -2092,8 +2097,8 @@ final class EDD_Payment {
 	 * @return bool If this payment has unlimited downloads
 	 */
 	private function setup_has_unlimited() {
-		$unlimited = (bool) $this->get_meta( '_edd_payment_unlimited_downloads', true );
-		return $unlimited;
+		// Retired in WPI-Cart; retained for extension compatibility.
+		return true;
 	}
 
 	/**
@@ -2282,7 +2287,13 @@ final class EDD_Payment {
 	 * @return bool Is unlimited
 	 */
 	private function get_unlimited() {
-		return apply_filters( 'edd_payment_unlimited_downloads', $this->unlimited, $this->ID, $this );
+		// Retired in WPI-Cart; retained for extension compatibility.
+		return true;
+	}
+
+	/** Download count limits are retired, including for legacy property access. */
+	private function get_has_unlimited_downloads() {
+		return true;
 	}
 
 }
