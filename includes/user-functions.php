@@ -324,28 +324,11 @@ function edd_purchase_total_of_user( $user = null ) {
  * @since       1.3
  * @param       $user mixed - ID or email
  * @return      int - The total number of files the user has downloaded
+ * @deprecated File download logging and count limits are retired in WPI-Cart.
  */
 function edd_count_file_downloads_of_user( $user ) {
-	global $edd_logs;
-
-	if ( is_email( $user ) ) {
-		$meta_query = array(
-			array(
-				'key'     => '_edd_log_user_info',
-				'value'   => $user,
-				'compare' => 'LIKE'
-			)
-		);
-	} else {
-		$meta_query = array(
-			array(
-				'key'     => '_edd_log_user_id',
-				'value'   => $user
-			)
-		);
-	}
-
-	return $edd_logs->get_log_count( null, 'file_download', $meta_query );
+	// Retired in WPI-Cart; retained for extension compatibility.
+	return 0;
 }
 
 /**

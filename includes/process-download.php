@@ -110,16 +110,6 @@ function edd_process_download() {
 		// Allow the file to be altered before any headers are sent
 		$requested_file = apply_filters( 'edd_requested_file', $requested_file, $download_files, $args['file_key'] );
 
-		// Record this file download in the log
-		$user_info = array();
-		$user_info['email'] = $args['email'];
-		if ( is_user_logged_in() ) {
-			$user_data         = get_userdata( get_current_user_id() );
-			$user_info['id']   = get_current_user_id();
-			$user_info['name'] = $user_data->display_name;
-		}
-
-		edd_record_download_in_log( $args['download'], $args['file_key'], $user_info, edd_get_ip(), $args['payment'], $args['price_id'] );
 
 		$file_extension = edd_get_file_extension( $requested_file );
 		$ctype          = edd_get_file_ctype( $file_extension );
@@ -785,10 +775,6 @@ function edd_process_signed_download_url( $args ) {
 
 	$order_parts = explode( ':', rawurldecode( $_GET['eddfile'] ) );
 
-	// Check to make sure not at download limit
-	if ( edd_is_file_at_download_limit( $order_parts[1], $order_parts[0], $order_parts[2], $order_parts[3] ) ) {
-		wp_die( apply_filters( 'edd_download_limit_reached_text', __( 'Sorry but you have hit your download limit for this file.', 'easy-digital-downloads' ) ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
-	}
 
 	$args['expire']      = $_GET['ttl'];
 	$args['download']    = $order_parts[1];

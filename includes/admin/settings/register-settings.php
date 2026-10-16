@@ -784,13 +784,6 @@ function edd_get_registered_settings() {
 						'desc' => __( 'Check this if you are delivering really large files or having problems with file downloads completing.', 'easy-digital-downloads' ),
 						'type' => 'checkbox',
 					),
-					'file_download_limit' => array(
-						'id'   => 'file_download_limit',
-						'name' => __( 'File Download Limit', 'easy-digital-downloads' ),
-						'desc' => sprintf( __( 'The maximum number of times files can be downloaded for purchases. Can be overwritten for each %s.', 'easy-digital-downloads' ), edd_get_label_singular() ),
-						'type' => 'number',
-						'size' => 'small',
-					),
 					'download_link_expiration' => array(
 						'id'   => 'download_link_expiration',
 						'name' => __( 'Download Link Expiration', 'easy-digital-downloads' ),

@@ -157,6 +157,11 @@ class EDD_Logging {
 	 * @return int The ID of the newly created log item
 	 */
 	function insert_log( $log_data = array(), $log_meta = array() ) {
+		// Block retired logs before creating a post or invoking write hooks.
+		if ( isset( $log_data['log_type'] ) && 'file_download' === $log_data['log_type'] ) {
+			return 0;
+		}
+
 		$defaults = array(
 			'post_type'    => 'edd_log',
 			'post_status'  => 'publish',
@@ -319,6 +324,11 @@ class EDD_Logging {
 	 * @return void
 	 */
 	public function delete_logs( $object_id = 0, $type = null, $meta_query = null  ) {
+		// Never broaden a typed deletion for an unknown type.
+		if ( ! empty( $type ) && ! $this->valid_type( $type ) ) {
+			return;
+		}
+
 		$query_args = array(
 			'post_parent'    => $object_id,
 			'post_type'      => 'edd_log',

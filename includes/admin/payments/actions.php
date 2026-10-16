@@ -36,7 +36,6 @@ function edd_update_payment_details( $data ) {
 	$user_info   = $payment->user_info;
 
 	$status      = $data['edd-payment-status'];
-	$unlimited   = isset( $data['edd-unlimited-downloads'] ) ? '1' : '';
 	$date        = sanitize_text_field( $data['edd-payment-date'] );
 	$hour        = sanitize_text_field( $data['edd-payment-time-hour'] );
 
@@ -242,7 +241,6 @@ function edd_update_payment_details( $data ) {
 	$payment->total          = $new_total;
 	$payment->tax            = $tax;
 
-	$payment->has_unlimited_downloads = $unlimited;
 
 	// Check for payment notes
 	if ( ! empty( $data['edd-payment-note'] ) ) {
@@ -400,11 +398,6 @@ function edd_ajax_generate_file_download_link() {
 	$payment_key = edd_get_payment_key( $payment_id );
 	$email       = edd_get_payment_user_email( $payment_id );
 
-	$limit = edd_get_file_download_limit( $download_id );
-	if ( ! empty( $limit ) ) {
-		// Increase the file download limit when generating new links
-		edd_set_file_download_limit_override( $download_id, $payment_id );
-	}
 
 	$files = edd_get_download_files( $download_id, $price_id );
 	if( ! $files ) {
