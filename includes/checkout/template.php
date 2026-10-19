@@ -758,7 +758,7 @@ function edd_checkout_hidden_fields() {
 	<input type="hidden" name="edd-user-id" value="<?php echo get_current_user_id(); ?>"/>
 	<?php } ?>
 	<input type="hidden" name="edd_action" value="purchase"/>
-	<input type="hidden" name="edd-gateway" value="<?php echo edd_get_chosen_gateway(); ?>" />
+	<input type="hidden" name="edd-gateway" value="<?php echo esc_attr( edd_get_chosen_gateway() ); ?>" />
 	<?php wp_nonce_field( 'edd-process-checkout', 'edd-process-checkout-nonce', false, true ); ?>
 <?php
 }
