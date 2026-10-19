@@ -506,8 +506,6 @@ final class EDD_Amazon_Payments {
 
 			if( $user ) {
 
-				edd_log_user_in( $user->ID, $user->user_login, '' );
-
 				$customer = array(
 					'first_name' => $user->first_name,
 					'last_name'  => $user->last_name,
@@ -537,9 +535,7 @@ final class EDD_Amazon_Payments {
 						'user_pass'    => wp_generate_password( 20 ),
 					);
 
-					$user_id = wp_insert_user( $args );
-
-					edd_log_user_in( $user_id, $args['user_login'], $args['user_pass'] );
+					wp_insert_user( $args );
 
 				}
 

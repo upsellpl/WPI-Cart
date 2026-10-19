@@ -589,7 +589,7 @@ function edd_purchase_form_validate_guest_user() {
 }
 
 /**
- * Register And Login New User
+ * Register New User
  *
  * @param array   $user_data
  *
@@ -628,9 +628,6 @@ function edd_register_and_login_new_user( $user_data = array() ) {
 	// Allow themes and plugins to hook
 	do_action( 'edd_insert_user', $user_id, $user_data );
 
-	// Login new user
-	edd_log_user_in( $user_id, $user_data['user_login'], $user_data['user_pass'] );
-
 	// Return user id
 	return $user_id;
 }
@@ -650,7 +647,7 @@ function edd_get_purchase_form_user( $valid_data = array() ) {
 	$is_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX;
 
 	if ( $is_ajax ) {
-		// Do not create or login the user during the ajax submission (check for errors only)
+		// Do not create the user during the ajax submission (check for errors only)
 		return true;
 	} else if ( is_user_logged_in() ) {
 		// Set the valid user as the logged in collected data
@@ -660,23 +657,18 @@ function edd_get_purchase_form_user( $valid_data = array() ) {
 		if ( $valid_data['need_new_user'] === true ) {
 			// Set user
 			$user = $valid_data['new_user_data'];
-			// Register and login new user
+			// Register new user
 			$user['user_id'] = edd_register_and_login_new_user( $user );
-			// User login
+			// Validated login data
 		} else if ( $valid_data['need_user_login'] === true  && ! $is_ajax ) {
 			/*
 			 * This is still here for backwards compatibility.
-			 * This also allows the old login process to still work if a user removes the
-			 * checkout login submit button.
-			 *
-			 * This also ensures that the customer is logged in correctly if they click "Purchase"
-			 * instead of submitting the login form, meaning the customer is logged in during the purchase process.
+			 * Use the validated customer data when they click "Purchase" instead of
+			 * submitting the login form.
 			 */
 
 			// Set user
 			$user = $valid_data['login_user_data'];
-			// Login user
-			edd_log_user_in( $user['user_id'], $user['user_login'], $user['user_pass'] );
 		}
 	}
 
