@@ -5971,35 +5971,41 @@ msgstr ""
 msgid "Purchase History"
 msgstr ""
 
+#: includes/login-register.php:84
 msgid "The password you entered is incorrect"
 msgstr ""
 
-#: includes/process-purchase.php:579
+#: includes/login-register.php:87 includes/process-purchase.php:579
 msgid "The username you entered does not exist"
 msgstr ""
 
+#: includes/login-register.php:140 includes/login-register.php:148
 #: includes/process-purchase.php:467
 msgid "Invalid username"
 msgstr ""
 
-#: includes/process-purchase.php:460
+#: includes/login-register.php:144 includes/process-purchase.php:460
 msgid "Username already taken"
 msgstr ""
 
+#: includes/login-register.php:152
 msgid "Email address already taken"
 msgstr ""
 
-#: includes/process-purchase.php:407
+#: includes/login-register.php:156 includes/process-purchase.php:407
 #: includes/process-purchase.php:482 includes/process-purchase.php:612
 msgid "Invalid email"
 msgstr ""
 
+#: includes/login-register.php:160
 msgid "Invalid payment email"
 msgstr ""
 
+#: includes/login-register.php:164
 msgid "Please enter a password"
 msgstr ""
 
+#: includes/login-register.php:168
 msgid "Passwords do not match"
 msgstr ""
 
@@ -7221,4 +7227,14 @@ msgstr ""
 #: includes/post-types.php:348
 msgctxt "Inactive discount code status"
 msgid "Inactive"
+msgstr ""
+
+# Copyright (C) 2016 Pippin Williamson and Company
+# This file is distributed under the same license as the Easy Digital Downloads package.
+#: includes/scripts.php
+msgid "Could not confirm that the note was saved. Check the notes before trying again."
+msgstr ""
+
+#: includes/scripts.php
+msgid "Security check failed or you do not have permission. Refresh the page and check your permissions before trying again."
 msgstr ""

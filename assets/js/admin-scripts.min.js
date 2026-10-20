@@ -581,13 +581,21 @@ jQuery(document).ready(function ($) {
 
 			$('#edd-add-payment-note').on('click', function(e) {
 				e.preventDefault();
+				var $button = $(this);
+				var $note = $('#edd-payment-note');
+				if ( $button.data('saving') ) {
+					return;
+				}
+				$('#edd-payment-note-error').remove();
 				var postData = {
 					action : 'edd_insert_payment_note',
 					payment_id : $(this).data('payment-id'),
-					note : $('#edd-payment-note').val()
+					note : $note.val(),
+					nonce : edd_vars.add_payment_note_nonce
 				};
 
 				if( postData.note ) {
+					$button.data('saving', true).prop('disabled', true).attr('aria-busy', 'true');
 
 					$.ajax({
 						type: "POST",
@@ -596,12 +604,16 @@ jQuery(document).ready(function ($) {
 						success: function (response) {
 							$('#edd-payment-notes-inner').append( response );
 							$('.edd-no-payment-notes').hide();
-							$('#edd-payment-note').val('');
+							if ( $note.val() === postData.note ) {
+								$note.val('');
+							}
 						}
 					}).fail(function (data) {
-						if ( window.console && window.console.log ) {
-							console.log( data );
-						}
+						$('<div id="edd-payment-note-error" class="notice notice-error" role="alert"><p></p></div>')
+							.find('p').text( data.status === 403 ? edd_vars.payment_note_forbidden : edd_vars.payment_note_error )
+							.end().insertAfter( $note );
+					}).always(function () {
+						$button.data('saving', false).prop('disabled', false).removeAttr('aria-busy');
 					});
 
 				} else {

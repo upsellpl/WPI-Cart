@@ -311,21 +311,27 @@ add_action( 'edd_delete_payment', 'edd_trigger_purchase_delete' );
 
 function edd_ajax_store_payment_note() {
 
-	$payment_id = absint( $_POST['payment_id'] );
-	$note       = wp_kses( $_POST['note'], array() );
+	$nonce = isset( $_POST['nonce'] ) && is_string( $_POST['nonce'] ) ? wp_unslash( $_POST['nonce'] ) : '';
+	if ( ! wp_verify_nonce( $nonce, 'edd_add_payment_note' ) ) {
+		wp_die( '-1', '', array( 'response' => 403 ) );
+	}
+
+	$payment_id = isset( $_POST['payment_id'] ) && is_scalar( $_POST['payment_id'] ) ? absint( $_POST['payment_id'] ) : 0;
+	$note       = isset( $_POST['note'] ) && is_string( $_POST['note'] ) ? trim( wp_kses( wp_unslash( $_POST['note'] ), array() ) ) : '';
 
 	if( ! current_user_can( 'edit_shop_payments', $payment_id ) ) {
 		wp_die( __( 'You do not have permission to edit this payment record', 'easy-digital-downloads' ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
 	}
 
-	if( empty( $payment_id ) )
-		die( '-1' );
-
-	if( empty( $note ) )
-		die( '-1' );
+	if ( empty( $payment_id ) || '' === $note || 'edd_payment' !== get_post_type( $payment_id ) ) {
+		wp_die( '-1', '', array( 'response' => 400 ) );
+	}
 
 	$note_id = edd_insert_payment_note( $payment_id, $note );
-	die( edd_get_payment_note_html( $note_id ) );
+	if ( ! $note_id || is_wp_error( $note_id ) ) {
+		wp_die( '-1', '', array( 'response' => 500 ) );
+	}
+	die( edd_get_payment_note_html( $note_id, $payment_id ) );
 }
 add_action( 'wp_ajax_edd_insert_payment_note', 'edd_ajax_store_payment_note' );
 
