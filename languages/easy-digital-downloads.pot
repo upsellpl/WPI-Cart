@@ -1,5 +1,3 @@
-# Copyright (C) 2016 Pippin Williamson and Company
-# This file is distributed under the same license as the Easy Digital Downloads package.
 msgid ""
 msgstr ""
 "Project-Id-Version: Easy Digital Downloads 2.5.14\n"
@@ -7227,4 +7225,14 @@ msgstr ""
 #: includes/post-types.php:348
 msgctxt "Inactive discount code status"
 msgid "Inactive"
+msgstr ""
+
+# Copyright (C) 2016 Pippin Williamson and Company
+# This file is distributed under the same license as the Easy Digital Downloads package.
+#: includes/scripts.php
+msgid "Could not confirm that the note was saved. Check the notes before trying again."
+msgstr ""
+
+#: includes/scripts.php
+msgid "Security check failed or you do not have permission. Refresh the page and check your permissions before trying again."
 msgstr ""

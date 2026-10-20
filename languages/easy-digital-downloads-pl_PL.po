@@ -3710,3 +3710,11 @@ msgstr "łącznie"
 
 msgid "Discount code"
 msgstr "Kod zniżkowy"
+
+#: includes/scripts.php
+msgid "Could not confirm that the note was saved. Check the notes before trying again."
+msgstr "Nie udało się potwierdzić zapisu notatki. Przed ponowną próbą sprawdź listę notatek."
+
+#: includes/scripts.php
+msgid "Security check failed or you do not have permission. Refresh the page and check your permissions before trying again."
+msgstr "Weryfikacja zabezpieczeń nie powiodła się lub nie masz wymaganych uprawnień. Odśwież stronę i sprawdź swoje uprawnienia przed ponowną próbą."
