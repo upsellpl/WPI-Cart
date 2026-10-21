@@ -72,9 +72,6 @@ function edd_download_metabox_fields() {
 			'_edd_default_price_id'
 		);
 
-	if ( current_user_can( 'manage_shop_settings' ) ) {
-		$fields[] = '_edd_download_limit';
-	}
 
 	if ( edd_use_skus() ) {
 		$fields[] = 'edd_sku';
@@ -114,26 +111,7 @@ function edd_download_meta_box_save( $post_id, $post ) {
 
 	foreach ( $fields as $field ) {
 
-		// Accept blank or "0"
-		if ( '_edd_download_limit' == $field ) {
-			if ( ! empty( $_POST[ $field ] ) || strlen( $_POST[ $field ] ) === 0 || "0" === $_POST[ $field ] ) {
-
-				$global_limit = edd_get_option( 'file_download_limit' );
-				$new_limit    = apply_filters( 'edd_metabox_save_' . $field, $_POST[ $field ] );
-
-				// Only update the new limit if it is not the same as the global limit
-				if( $global_limit == $new_limit ) {
-
-					delete_post_meta( $post_id, '_edd_download_limit' );
-
-				} else {
-
-					update_post_meta( $post_id, '_edd_download_limit', $new_limit );
-
-				}
-			}
-
-		} elseif ( '_edd_default_price_id' == $field && edd_has_variable_prices( $post_id ) ) {
+		if ( '_edd_default_price_id' == $field && edd_has_variable_prices( $post_id ) ) {
 
 			if ( isset( $_POST[ $field ] ) ) {
 				$new_default_price_id = ( ! empty( $_POST[ $field ] ) && is_numeric( $_POST[ $field ] ) ) || ( 0 === (int) $_POST[ $field ] ) ? (int) $_POST[ $field ] : 1;
@@ -772,29 +750,13 @@ add_filter( 'media_view_strings', 'edd_download_media_strings', 10, 1 );
  * @since 1.3.1
  * @param int $post_id Download (Post) ID
  * @return void
+ * @deprecated File download logging and count limits are retired in WPI-Cart.
  */
 function edd_render_download_limit_row( $post_id ) {
-	if( ! current_user_can( 'manage_shop_settings' ) ) {
-		return;
-	}
-
-	$edd_download_limit = edd_get_file_download_limit( $post_id );
-	$display = 'bundle' == edd_get_download_type( $post_id ) ? ' style="display: none;"' : '';
-?>
-	<div id="edd_download_limit_wrap"<?php echo $display; ?>>
-		<p><strong><?php _e( 'File Download Limit:', 'easy-digital-downloads' ); ?></strong></p>
-		<label for="edd_download_limit">
-			<?php echo EDD()->html->text( array(
-				'name'  => '_edd_download_limit',
-				'value' => $edd_download_limit,
-				'class' => 'small-text'
-			) ); ?>
-			<?php _e( 'Leave blank for global setting or 0 for unlimited', 'easy-digital-downloads' ); ?>
-		</label>
-	</div>
-<?php
+	// Retired in WPI-Cart; retained for extension compatibility.
+	return;
 }
-add_action( 'edd_meta_box_settings_fields', 'edd_render_download_limit_row', 20 );
+
 
 /**
  * Product tax settings
@@ -987,11 +949,6 @@ function edd_render_stats_meta_box() {
 		<span><a href="<?php echo admin_url( 'edit.php?post_type=download&page=edd-reports&view=downloads&download-id=' . $post->ID ); ?>"><?php echo edd_currency_filter( edd_format_amount( $earnings ) ); ?></a></span>
 	</p>
 
-	<hr />
-
-	<p class="file-download-log">
-		<span><a href="<?php echo admin_url( 'edit.php?page=edd-reports&view=file_downloads&post_type=download&tab=logs&download=' . $post->ID ); ?>"><?php _e( 'View File Download Log', 'easy-digital-downloads' ); ?></a></span><br/>
-	</p>
 <?php
 	do_action('edd_stats_meta_box');
 }
