@@ -4058,7 +4058,7 @@ msgstr ""
 msgid "Credits"
 msgstr ""
 
-#: includes/admin/welcome.php:186 includes/gateways/amazon-payments.php:264
+#: includes/admin/welcome.php:186
 msgid "Amazon Payments"
 msgstr ""
 
@@ -5688,105 +5688,78 @@ msgstr ""
 msgid "You must enable a payment gateway to use Easy Digital Downloads"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:229
-#: includes/gateways/amazon-payments.php:230
 msgid "Amazon"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:282
 msgid "Amazon Payments Settings"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:287
 msgid "Register with Amazon"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:289
 msgid "Connect Easy Digital Downloads to Amazon"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:292
 msgid "Once registration is complete, enter your API credentials below."
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:298
 msgid "Seller ID"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:299
 msgid "Found in the Integration settings. Also called a Merchant ID"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:305
 msgid "MWS Access Key"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:306
-#: includes/gateways/amazon-payments.php:313
 msgid "Found on Seller Central in the MWS Keys section"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:312
 msgid "MWS Secret Key"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:319
 msgid "Client ID"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:320
 msgid "The Amazon Client ID. Should look like `amzn1.application-oa2...`"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:326
 msgid "Amazon MWS Callback URL"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:327
 msgid ""
 "The Return URL to provide in your MWS Application. Enter this under your "
 "Login and Pay &rarr; Web Settings"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:335
 msgid "Amazon Merchant IPN URL"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:336
 msgid ""
 "The IPN URL to provide in your MWS account. Enter this under your <a "
 "href=\"%s\">Integration Settings</a>"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:629
 msgid "Currently logged into Amazon as"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:630
 msgid "Logout"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:783
-#: includes/gateways/amazon-payments.php:798
 msgid "Missing Reference ID, please try again"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:834
 msgid ""
 "Your payment could not be authorized, please try a different payment "
 "method. Reason: %s"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:881
 msgid "There was an issue processing your payment. Amazon error: %s"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:1017
 msgid "Invalid Amazon seller ID"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:1017
-#: includes/gateways/amazon-payments.php:1071
 #: includes/gateways/paypal-standard.php:286
 #: includes/gateways/paypal-standard.php:291
 #: includes/gateways/paypal-standard.php:352
@@ -5796,24 +5769,18 @@ msgstr ""
 msgid "IPN Error"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:1041
 msgid "Capture declined in Amazon"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:1059
-#: includes/gateways/amazon-payments.php:1147
 msgid "Refund completed in Amazon. Refund ID: %s"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:1140
 msgid "Refund declined in Amazon. Refund ID: %s"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:1153
 msgid "Refund initiated in Amazon. Reference ID: %s"
 msgstr ""
 
-#: includes/gateways/amazon-payments.php:1162
 msgid "Refund request failed in Amazon."
 msgstr ""
 
