@@ -55,9 +55,7 @@ function edd_admin_footer_for_thickbox() {
 	if ( in_array( $pagenow, array( 'post.php', 'page.php', 'post-new.php', 'post-edit.php' ) ) && $typenow != 'download' ) { ?>
 		<script type="text/javascript">
             function insertDownload() {
-                var id = jQuery('#products').val(),
-                    direct = jQuery('#select-edd-direct').val(),
-                    style = jQuery('#select-edd-style').val(),
+                var id = jQuery('#products').val(),                    style = jQuery('#select-edd-style').val(),
                     color = jQuery('#select-edd-color').is(':visible') ? jQuery('#select-edd-color').val() : '',
                     text = jQuery('#edd-text').val() || '<?php _e( "Purchase", "easy-digital-downloads" ); ?>';
 
@@ -66,15 +64,8 @@ function edd_admin_footer_for_thickbox() {
                     alert('<?php _e( "You must choose a download", "easy-digital-downloads" ); ?>');
                     return;
                 }
-
-                if( '2' == direct ) {
-                	direct = ' direct="true"';
-                } else {
-                	direct = '';
-                }
-
                 // Send the shortcode to the editor
-                window.send_to_editor('[purchase_link id="' + id + '" style="' + style + '" color="' + color + '" text="' + text + '"' + direct +']');
+                window.send_to_editor('[purchase_link id="' + id + '" style="' + style + '" color="' + color + '" text="' + text + '"]');
             }
             jQuery(document).ready(function ($) {
                 $('#select-edd-style').change(function () {
@@ -92,17 +83,7 @@ function edd_admin_footer_for_thickbox() {
 				<p><?php echo sprintf( __( 'Use the form below to insert the short code for purchasing a %s', 'easy-digital-downloads' ), edd_get_label_singular() ); ?></p>
 				<div>
 					<?php echo EDD()->html->product_dropdown( array( 'chosen' => true )); ?>
-				</div>
-				<?php if( edd_shop_supports_buy_now() ) : ?>
-					<div>
-						<select id="select-edd-direct" style="clear: both; display: block; margin-bottom: 1em; margin-top: 1em;">
-							<option value="0"><?php _e( 'Choose the button behavior', 'easy-digital-downloads' ); ?></option>
-							<option value="1"><?php _e( 'Add to Cart', 'easy-digital-downloads' ); ?></option>
-							<option value="2"><?php _e( 'Direct Purchase Link', 'easy-digital-downloads' ); ?></option>
-						</select>
-					</div>
-				<?php endif; ?>
-				<div>
+				</div>				<div>
 					<select id="select-edd-style" style="clear: both; display: block; margin-bottom: 1em; margin-top: 1em;">
 						<option value=""><?php _e( 'Choose a style', 'easy-digital-downloads' ); ?></option>
 						<?php

@@ -71,7 +71,6 @@ class EDD_Register_Meta {
 		register_meta( 'post', 'edd_variable_prices',    array( $this, 'sanitize_variable_prices' ) );
 		register_meta( 'post', 'edd_download_files',     array( $this, 'sanitize_files' ) );
 		register_meta( 'post', '_edd_bundled_products',  array( $this, 'sanitize_array' ) );
-		register_meta( 'post', '_edd_button_behavior',   'sanitize_text_field' );
 		register_meta( 'post', '_edd_default_price_id',  array( $this, 'intval_wrapper' ) );
 	}
 

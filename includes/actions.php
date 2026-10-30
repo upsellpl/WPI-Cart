@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 function edd_get_actions() {
 	if ( isset( $_GET['edd_action'] ) ) {
 
-		// Purchases must only be processed via the POSTed checkout and buy-now forms.
+		// Purchases must only be processed via the POSTed checkout form.
 		if ( 'purchase' === $_GET['edd_action'] || 'straight_to_gateway' === $_GET['edd_action'] ) {
 			wp_die( __( 'This action is not allowed.', 'easy-digital-downloads' ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
 		}

@@ -32,7 +32,6 @@ function edd_download_shortcode( $atts, $content = null ) {
 		'price_id'      => isset( $atts['price_id'] ) ? $atts['price_id'] : false,
 		'sku'			=> '',
 		'price'         => '1',
-		'direct'        => '0',
 		'text'          => '',
 		'style'         => edd_get_option( 'button_style', 'button' ),
 		'color'         => edd_get_option( 'checkout_color', 'blue' ),
@@ -43,11 +42,7 @@ function edd_download_shortcode( $atts, $content = null ) {
 
 	// Override text only if not provided / empty
 	if ( ! $atts['text'] ) {
-		if( $atts['direct'] == '1' || $atts['direct'] == 'true' ) {
-			$atts['text'] = edd_get_option( 'buy_now_text', __( 'Buy Now', 'easy-digital-downloads' ) );
-		} else {
-			$atts['text'] = edd_get_option( 'add_to_cart_text', __( 'Purchase', 'easy-digital-downloads' ) );
-		}
+		$atts['text'] = edd_get_option( 'add_to_cart_text', __( 'Purchase', 'easy-digital-downloads' ) );
 	}
 
 	// Override color if color == inherit

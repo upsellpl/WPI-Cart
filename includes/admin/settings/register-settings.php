@@ -754,13 +754,6 @@ function edd_get_registered_settings() {
 						'type' => 'text',
 						'std'  => __( 'Add to Cart', 'easy-digital-downloads' ),
 					),
-					'buy_now_text' => array(
-						'id'   => 'buy_now_text',
-						'name' => __( 'Buy Now Text', 'easy-digital-downloads' ),
-						'desc' => __( 'Text shown on the Buy Now Buttons.', 'easy-digital-downloads' ),
-						'type' => 'text',
-						'std'  => __( 'Buy Now', 'easy-digital-downloads' ),
-					),
 				),
 				'file_downloads' => array(
 					'file_settings' => array(

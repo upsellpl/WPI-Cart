@@ -62,25 +62,17 @@ function edd_get_purchase_link( $args = array() ) {
 	}
 
 	$post_id = is_object( $post ) ? $post->ID : 0;
-	$button_behavior = edd_get_download_button_behavior( $post_id );
-
 	$defaults = apply_filters( 'edd_purchase_link_defaults', array(
 		'download_id' => $post_id,
 		'price'       => (bool) true,
 		'price_id'    => isset( $args['price_id'] ) ? $args['price_id'] : false,
-		'direct'      => $button_behavior == 'direct' ? true : false,
-		'text'        => $button_behavior == 'direct' ? edd_get_option( 'buy_now_text', __( 'Buy Now', 'easy-digital-downloads' ) ) : edd_get_option( 'add_to_cart_text', __( 'Purchase', 'easy-digital-downloads' ) ),
+		'text'        => edd_get_option( 'add_to_cart_text', __( 'Purchase', 'easy-digital-downloads' ) ),
 		'style'       => edd_get_option( 'button_style', 'button' ),
 		'color'       => edd_get_option( 'checkout_color', 'blue' ),
 		'class'       => 'edd-submit'
 	) );
 
 	$args = wp_parse_args( $args, $defaults );
-
-	// Override the stright_to_gateway if the shop doesn't support it
-	if ( ! edd_shop_supports_buy_now() ) {
-		$args['direct'] = false;
-	}
 
 	$download = new EDD_Download( $args['download_id'] );
 
@@ -207,11 +199,8 @@ function edd_get_purchase_link( $args = array() ) {
 		<?php if ( $variable_pricing && isset( $price_id ) && isset( $prices[$price_id] ) ): ?>
 			<input type="hidden" name="edd_options[price_id][]" id="edd_price_option_<?php echo $download->ID; ?>_1" class="edd_price_option_<?php echo $download->ID; ?>" value="<?php echo $price_id; ?>">
 		<?php endif; ?>
-		<?php if( ! empty( $args['direct'] ) && ! $download->is_free( $args['price_id'] ) ) { ?>
-			<input type="hidden" name="edd_action" class="edd_action_input" value="straight_to_gateway">
-		<?php } else { ?>
-			<input type="hidden" name="edd_action" class="edd_action_input" value="add_to_cart">
-		<?php } ?>
+		<input type="hidden" name="edd_action" class="edd_action_input" value="add_to_cart">
+		
 
 		<?php if( apply_filters( 'edd_download_redirect_to_checkout', edd_straight_to_checkout(), $download->ID, $args ) ) : ?>
 			<input type="hidden" name="edd_redirect_to_checkout" id="edd_redirect_to_checkout" value="1">

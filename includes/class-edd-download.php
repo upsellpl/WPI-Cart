@@ -97,13 +97,6 @@ class EDD_Download {
 	private $sku;
 
 	/**
-	 * The download's purchase button behavior
-	 *
-	 * @since 2.2
-	 */
-	private $button_behavior;
-
-	/**
 	 * Declare the default properties in WP_Post as we can't extend it
 	 * Anything we've declared above has been removed.
 	 */
@@ -561,30 +554,6 @@ class EDD_Download {
 		}
 
 		return apply_filters( 'edd_get_download_sku', $this->sku, $this->ID );
-
-	}
-
-	/**
-	 * Retrieve the purchase button behavior
-	 *
-	 * @since 2.2
-	 * @return string
-	 */
-	public function get_button_behavior() {
-
-		if( ! isset( $this->button_behavior ) ) {
-
-			$this->button_behavior = get_post_meta( $this->ID, '_edd_button_behavior', true );
-
-			if( empty( $this->button_behavior ) || ! edd_shop_supports_buy_now() ) {
-
-				$this->button_behavior = 'add_to_cart';
-
-			}
-
-		}
-
-		return apply_filters( 'edd_get_download_button_behavior', $this->button_behavior, $this->ID );
 
 	}
 
