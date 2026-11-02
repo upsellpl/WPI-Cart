@@ -70,12 +70,6 @@ window.EDD_Checkout = (function($) {
 		// Update the checkout when item quantities are updated
 		$body.on('change', '.edd-item-quantity', update_item_quantities);
 
-		$body.on('click', '.edd-amazon-logout #Logout', function(e) {
-			e.preventDefault();
-			amazon.Login.logout();
-			window.location = edd_amazon.checkoutUri;
-		});
-
 	}
 
 	function update_state_field() {

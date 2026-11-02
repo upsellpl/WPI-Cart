@@ -39,11 +39,6 @@ function edd_process_purchase_form() {
 
 	$is_ajax = isset( $_POST['edd_ajax'] );
 
-	// Process the login form
-	if ( isset( $_POST['edd_login_submit'] ) ) {
-		edd_process_purchase_login();
-	}
-
 	// Validate the user
 	$user = edd_get_purchase_form_user( $valid_data );
 
@@ -128,42 +123,6 @@ function edd_process_purchase_form() {
 	edd_die();
 }
 add_action( 'edd_purchase', 'edd_process_purchase_form' );
-add_action( 'wp_ajax_edd_process_checkout', 'edd_process_purchase_form' );
-add_action( 'wp_ajax_nopriv_edd_process_checkout', 'edd_process_purchase_form' );
-
-/**`
- * Process the checkout login form
- *
- * @access      private
- * @since       1.8
- * @return      void
- */
-function edd_process_purchase_login() {
-
-	$is_ajax = isset( $_POST['edd_ajax'] );
-
-	$user_data = edd_purchase_form_validate_user_login();
-
-	if ( edd_get_errors() || $user_data['user_id'] < 1 ) {
-		if ( $is_ajax ) {
-			do_action( 'edd_ajax_checkout_errors' );
-			edd_die();
-		} else {
-			wp_redirect( $_SERVER['HTTP_REFERER'] ); exit;
-		}
-	}
-
-	edd_log_user_in( $user_data['user_id'], $user_data['user_login'], $user_data['user_pass'] );
-
-	if ( $is_ajax ) {
-		echo 'success';
-		edd_die();
-	} else {
-		wp_redirect( edd_get_checkout_uri( $_SERVER['QUERY_STRING'] ) );
-	}
-}
-add_action( 'wp_ajax_edd_process_checkout_login', 'edd_process_purchase_login' );
-add_action( 'wp_ajax_nopriv_edd_process_checkout_login', 'edd_process_purchase_login' );
 
 /**
  * Purchase Form Validate Fields
@@ -630,7 +589,7 @@ function edd_purchase_form_validate_guest_user() {
 }
 
 /**
- * Register And Login New User
+ * Register New User
  *
  * @param array   $user_data
  *
@@ -669,9 +628,6 @@ function edd_register_and_login_new_user( $user_data = array() ) {
 	// Allow themes and plugins to hook
 	do_action( 'edd_insert_user', $user_id, $user_data );
 
-	// Login new user
-	edd_log_user_in( $user_id, $user_data['user_login'], $user_data['user_pass'] );
-
 	// Return user id
 	return $user_id;
 }
@@ -691,7 +647,7 @@ function edd_get_purchase_form_user( $valid_data = array() ) {
 	$is_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX;
 
 	if ( $is_ajax ) {
-		// Do not create or login the user during the ajax submission (check for errors only)
+		// Do not create the user during the ajax submission (check for errors only)
 		return true;
 	} else if ( is_user_logged_in() ) {
 		// Set the valid user as the logged in collected data
@@ -701,24 +657,18 @@ function edd_get_purchase_form_user( $valid_data = array() ) {
 		if ( $valid_data['need_new_user'] === true ) {
 			// Set user
 			$user = $valid_data['new_user_data'];
-			// Register and login new user
+			// Register new user
 			$user['user_id'] = edd_register_and_login_new_user( $user );
-			// User login
+			// Validated login data
 		} else if ( $valid_data['need_user_login'] === true  && ! $is_ajax ) {
 			/*
-			 * The login form is now processed in the edd_process_purchase_login() function.
 			 * This is still here for backwards compatibility.
-			 * This also allows the old login process to still work if a user removes the
-			 * checkout login submit button.
-			 *
-			 * This also ensures that the customer is logged in correctly if they click "Purchase"
-			 * instead of submitting the login form, meaning the customer is logged in during the purchase process.
+			 * Use the validated customer data when they click "Purchase" instead of
+			 * submitting the login form.
 			 */
 
 			// Set user
 			$user = $valid_data['login_user_data'];
-			// Login user
-			edd_log_user_in( $user['user_id'], $user['user_login'], $user['user_pass'] );
 		}
 	}
 
@@ -1040,7 +990,7 @@ function edd_check_purchase_email( $valid_data, $posted ) {
 
 	if( $is_banned ) {
 		// Set an error and give the customer a general error (don't alert them that they were banned)
-		edd_set_error( 'email_banned', __( 'An internal error has occurred, please try again or contact support.', 'easy-digital-downloads' ) );
+		edd_set_error( 'checkout_unavailable', __( 'An internal error has occurred, please try again or contact support.', 'easy-digital-downloads' ) );
 	}
 }
 add_action( 'edd_checkout_error_checks', 'edd_check_purchase_email', 10, 2 );

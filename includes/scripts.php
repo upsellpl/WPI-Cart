@@ -181,7 +181,7 @@ function edd_load_admin_scripts( $hook ) {
 		$admin_deps = array( 'jquery' );
 	}
 
-	wp_register_script( 'edd-admin-scripts', $js_dir . 'admin-scripts' . $suffix . '.js', $admin_deps, EDD_VERSION, false );
+	wp_register_script( 'edd-admin-scripts', $js_dir . 'admin-scripts' . $suffix . '.js', $admin_deps, EDD_VERSION . '-payment-note-nonce-1', false );
 	wp_enqueue_script( 'edd-admin-scripts', args: 1 );
 
 	$edd_vars = [
@@ -192,6 +192,9 @@ function edd_load_admin_scripts( $hook ) {
 		'quick_edit_warning'      => __( 'Sorry, not available for variable priced products.', 'easy-digital-downloads' ),
 		'delete_payment'          => __( 'Are you sure you wish to delete this payment?', 'easy-digital-downloads' ),
 		'delete_payment_note'     => __( 'Are you sure you wish to delete this note?', 'easy-digital-downloads' ),
+		'add_payment_note_nonce'  => wp_create_nonce( 'edd_add_payment_note' ),
+		'payment_note_error'      => __( 'Could not confirm that the note was saved. Check the notes before trying again.', 'easy-digital-downloads' ),
+		'payment_note_forbidden'  => __( 'Security check failed or you do not have permission. Refresh the page and check your permissions before trying again.', 'easy-digital-downloads' ),
 		'delete_tax_rate'         => __( 'Are you sure you wish to delete this tax rate?', 'easy-digital-downloads' ),
 		'revoke_api_key'          => __( 'Are you sure you wish to revoke this API key?', 'easy-digital-downloads' ),
 		'regenerate_api_key'      => __( 'Are you sure you wish to regenerate this API key?', 'easy-digital-downloads' ),

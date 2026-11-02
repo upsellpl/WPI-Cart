@@ -139,8 +139,11 @@ function edd_process_download() {
 		nocache_headers();
 		header("Robots: none");
 		header("Content-Type: " . $ctype . "");
+		header( 'X-Content-Type-Options: nosniff' );
 		header("Content-Description: File Transfer");
-		header("Content-Disposition: attachment; filename=\"" . apply_filters( 'edd_requested_file_name', basename( $requested_file ) ) . "\"");
+		$filename = apply_filters( 'edd_requested_file_name', basename( $requested_file ) );
+		$filename = preg_replace( '/[\x00-\x1F\x7F]/', '', (string) $filename );
+		header( 'Content-Disposition: attachment; filename="' . addcslashes( $filename, '\\"' ) . '"' );
 		header("Content-Transfer-Encoding: binary");
 
         $attachment_id = (int)$attachment_id;

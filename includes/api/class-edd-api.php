@@ -146,8 +146,6 @@ class EDD_API {
 			require_once EDD_PLUGIN_DIR . 'includes/api/class-edd-api-' . $version . '.php';
 		}
 
-		add_action( 'init',                     array( $this, 'add_endpoint'     ) );
-		add_action( 'wp',                       array( $this, 'process_query'    ), -1 );
 		add_filter( 'query_vars',               array( $this, 'query_vars'       ) );
 		add_action( 'show_user_profile',        array( $this, 'user_key_field'   ) );
 		add_action( 'edit_user_profile',        array( $this, 'user_key_field'   ) );
@@ -167,18 +165,6 @@ class EDD_API {
 		// Setup EDD_Stats instance
 		$this->stats = new EDD_Payment_Stats;
 
-	}
-
-	/**
-	 * Registers a new rewrite endpoint for accessing the API
-	 *
-	 * @access public
-	 * @author Daniel J Griffiths
-	 * @param array $rewrite_rules WordPress Rewrite Rules
-	 * @since 1.5
-	 */
-	public function add_endpoint( $rewrite_rules ) {
-		add_rewrite_endpoint( 'edd-api', EP_ALL );
 	}
 
 	/**
@@ -496,117 +482,6 @@ class EDD_API {
 
 		$this->data = $error;
 		$this->output( 404 );
-	}
-
-	/**
-	 * Listens for the API and then processes the API requests
-	 *
-	 * @access public
-	 * @author Daniel J Griffiths
-	 * @global $wp_query
-	 * @since 1.5
-	 * @return void
-	 */
-	public function process_query() {
-
-		global $wp_query;
-
-		// Start logging how long the request takes for logging
-		$before = microtime( true );
-
-		// Check for edd-api var. Get out if not present
-		if ( empty( $wp_query->query_vars['edd-api'] ) ) {
-			return;
-		}
-
-		// Determine which version was queried
-		$this->set_queried_version();
-
-		// Determine the kind of query
-		$this->set_query_mode();
-
-		// Check for a valid user and set errors if necessary
-		$this->validate_request();
-
-		// Only proceed if no errors have been noted
-		if( ! $this->is_valid_request ) {
-			return;
-		}
-
-		if( ! defined( 'EDD_DOING_API' ) ) {
-			define( 'EDD_DOING_API', true );
-		}
-
-		$data = array();
-		$this->routes = new $this->versions[ $this->get_queried_version() ];
-		$this->routes->validate_request();
-
-		switch( $this->endpoint ) :
-
-			case 'stats' :
-
-				$data = $this->routes->get_stats( array(
-					'type'      => isset( $wp_query->query_vars['type'] )      ? $wp_query->query_vars['type']      : null,
-					'product'   => isset( $wp_query->query_vars['product'] )   ? $wp_query->query_vars['product']   : null,
-					'date'      => isset( $wp_query->query_vars['date'] )      ? $wp_query->query_vars['date']      : null,
-					'startdate' => isset( $wp_query->query_vars['startdate'] ) ? $wp_query->query_vars['startdate'] : null,
-					'enddate'   => isset( $wp_query->query_vars['enddate'] )   ? $wp_query->query_vars['enddate']   : null
-				) );
-
-				break;
-
-			case 'products' :
-
-				$product = isset( $wp_query->query_vars['product'] )   ? $wp_query->query_vars['product']   : null;
-
-				$data = $this->routes->get_products( $product );
-
-				break;
-
-			case 'customers' :
-
-				$customer = isset( $wp_query->query_vars['customer'] ) ? $wp_query->query_vars['customer']  : null;
-
-				$data = $this->routes->get_customers( $customer );
-
-				break;
-
-			case 'sales' :
-
-				$data = $this->routes->get_recent_sales();
-
-				break;
-
-			case 'discounts' :
-
-				$discount = isset( $wp_query->query_vars['discount'] ) ? $wp_query->query_vars['discount']  : null;
-
-				$data = $this->routes->get_discounts( $discount );
-
-				break;
-
-			case 'file-download-logs' :
-
-				$customer = isset( $wp_query->query_vars['customer'] ) ? $wp_query->query_vars['customer']  : null;
-
-				$data = $this->get_download_logs( $customer );
-
-				break;
-
-		endswitch;
-
-		// Allow extensions to setup their own return data
-		$this->data = apply_filters( 'edd_api_output_data', $data, $this->endpoint, $this );
-
-		$after                       = microtime( true );
-		$request_time                = ( $after - $before );
-		$this->data['request_speed'] = $request_time;
-
-		// Log this API request, if enabled. We log it here because we have access to errors.
-		$this->log_request( $this->data );
-
-		// Send out data to the output function
-		$this->output();
 	}
 
 	/**

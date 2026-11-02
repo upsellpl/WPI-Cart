@@ -223,9 +223,6 @@ final class WPI_Cart {
 		require_once EDD_PLUGIN_DIR . 'includes/mime-types.php';
 		require_once EDD_PLUGIN_DIR . 'includes/gateways/actions.php';
 		require_once EDD_PLUGIN_DIR . 'includes/gateways/functions.php';
-		if ( version_compare( phpversion(), 5.3, '>' ) ) {
-			require_once EDD_PLUGIN_DIR . 'includes/gateways/amazon-payments.php';
-		}
 		require_once EDD_PLUGIN_DIR . 'includes/gateways/paypal-standard.php';
 		require_once EDD_PLUGIN_DIR . 'includes/gateways/manual.php';
 		require_once EDD_PLUGIN_DIR . 'includes/discount-functions.php';
@@ -249,7 +246,6 @@ final class WPI_Cart {
 		require_once EDD_PLUGIN_DIR . 'includes/query-filters.php';
 		require_once EDD_PLUGIN_DIR . 'includes/tax-functions.php';
 		require_once EDD_PLUGIN_DIR . 'includes/process-purchase.php';
-		require_once EDD_PLUGIN_DIR . 'includes/login-register.php';
 		require_once EDD_PLUGIN_DIR . 'includes/shortcodes.php';
 
 		if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
