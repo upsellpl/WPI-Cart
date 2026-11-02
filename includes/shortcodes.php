@@ -264,6 +264,12 @@ function edd_downloads_query( $atts, $content = null ) {
 		'pagination'       => 'true'
 	), $atts, 'downloads' );
 
+	// The bundled CSS supports 0 (no row breaks) through 6 columns.
+	// Validate after shortcode_atts so filtered attributes follow the same rules.
+	$columns = $atts['columns'];
+	$atts['columns'] = ( is_int( $columns ) || ( is_string( $columns ) && preg_match( '/^[0-6]$/D', $columns ) ) )
+		&& (int) $columns >= 0 && (int) $columns <= 6 ? (int) $columns : 3;
+
 	$query = array(
 		'post_type'      => 'download',
 		'orderby'        => $atts['orderby'],
@@ -459,9 +465,9 @@ function edd_downloads_query( $atts, $content = null ) {
 		$i = 1;
 		$wrapper_class = 'edd_download_columns_' . $atts['columns'];
 		ob_start(); ?>
-		<div class="edd_downloads_list <?php echo apply_filters( 'edd_downloads_list_wrapper_class', $wrapper_class, $atts ); ?>">
+		<div class="edd_downloads_list <?php echo esc_attr( apply_filters( 'edd_downloads_list_wrapper_class', $wrapper_class, $atts ) ); ?>">
 			<?php while ( $downloads->have_posts() ) : $downloads->the_post(); ?>
-				<div class="<?php echo apply_filters( 'edd_download_class', 'edd_download', get_the_ID(), $atts, $i ); ?>" id="edd_download_<?php echo get_the_ID(); ?>">
+				<div class="<?php echo esc_attr( apply_filters( 'edd_download_class', 'edd_download', get_the_ID(), $atts, $i ) ); ?>" id="edd_download_<?php echo esc_attr( get_the_ID() ); ?>">
 					<div class="edd_download_inner">
 						<?php
 
