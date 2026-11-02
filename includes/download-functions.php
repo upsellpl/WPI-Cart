@@ -1062,19 +1062,6 @@ function edd_get_download_sku( $download_id = 0 ) {
 }
 
 /**
- * get the Download button behavior, either add to cart or direct
- *
- * @since 1.7
- *
- * @param int $download_id
- * @return mixed|void Add to Cart or Direct
- */
-function edd_get_download_button_behavior( $download_id = 0 ) {
-    $download = new EDD_Download( $download_id );
-    return $download->button_behavior;
-}
-
-/**
  * Get the file Download method
  *
  * @since 1.6

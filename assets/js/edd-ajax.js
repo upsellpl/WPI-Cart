@@ -173,11 +173,6 @@ jQuery(document).ready(function ($) {
 			form.find('.edd_action_input').val('add_to_cart');
 		}
 
-		if( 'straight_to_gateway' == form.find('.edd_action_input').val() ) {
-			form.submit();
-			return true; // Submit the form
-		}
-
 		var action = $this.data('action');
 		var data   = {
 			action: action,

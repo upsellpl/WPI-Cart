@@ -67,7 +67,6 @@ function edd_download_metabox_fields() {
 			'_edd_bundled_products',
 			'_edd_hide_purchase_link',
 			'_edd_download_tax_exclusive',
-			'_edd_button_behavior',
 			'edd_product_notes',
 			'_edd_default_price_id'
 		);
@@ -889,7 +888,6 @@ add_action( 'edd_meta_box_settings_fields', 'edd_render_accounting_options', 25 
  */
 function edd_render_disable_button( $post_id ) {
 	$hide_button = get_post_meta( $post_id, '_edd_hide_purchase_link', true ) ? 1 : 0;
-	$behavior    = get_post_meta( $post_id, '_edd_button_behavior', true );
 ?>
 	<p><strong><?php _e( 'Button Options:', 'easy-digital-downloads' ); ?></strong></p>
 	<p>
@@ -900,26 +898,7 @@ function edd_render_disable_button( $post_id ) {
 			) ); ?>
 			<?php _e( 'Disable the automatic output of the purchase button', 'easy-digital-downloads' ); ?>
 		</label>
-	</p>
-	<?php if( edd_shop_supports_buy_now() ) : ?>
-	<p>
-		<label for="_edd_button_behavior">
-			<?php echo EDD()->html->select( array(
-				'name'    => '_edd_button_behavior',
-				'options' => array(
-					'add_to_cart' => __( 'Add to Cart', 'easy-digital-downloads' ),
-					'direct'      => __( 'Buy Now', 'easy-digital-downloads' )
-				),
-				'show_option_all'  => null,
-				'show_option_none' => null,
-				'selected' => $behavior
-			) ); ?>
-			<?php _e( 'Purchase button behavior', 'easy-digital-downloads' ); ?>
-		</label>
-	</p>
-<?php
-	endif;
-}
+	</p>}
 add_action( 'edd_meta_box_settings_fields', 'edd_render_disable_button', 30 );
 
 
