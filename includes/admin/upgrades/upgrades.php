@@ -9,76 +9,51 @@
  * @since       1.3.1
  */
 
-// Exit if accessed directly
-if ( !defined( 'ABSPATH' ) ) exit;
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
 
-/**
- * Render Upgrades Screen
- *
- * @since 1.3.1
- * @return void
-*/
+// Publigo's Stripe integration still uses this screen between migration batches.
+// Core EDD upgrades and their AJAX runner have been retired from WPI-Cart.
 function edd_upgrades_screen() {
-	$action = isset( $_GET['edd-upgrade'] ) ? sanitize_text_field( $_GET['edd-upgrade'] ) : '';
-	$step   = isset( $_GET['step'] )        ? absint( $_GET['step'] )                     : 1;
-	$total  = isset( $_GET['total'] )       ? absint( $_GET['total'] )                    : false;
-	$custom = isset( $_GET['custom'] )      ? absint( $_GET['custom'] )                   : 0;
-	$number = isset( $_GET['number'] )      ? absint( $_GET['number'] )                   : 100;
-	$steps  = round( ( $total / $number ), 0 );
+	$action = isset( $_GET['edd-upgrade'] ) && is_string( $_GET['edd-upgrade'] ) ? $_GET['edd-upgrade'] : '';
 
-	$doing_upgrade_args = array(
-		'page'        => 'edd-upgrades',
-		'edd-upgrade' => $action,
-		'step'        => $step,
-		'total'       => $total,
-		'custom'      => $custom,
-		'steps'       => $steps
-	);
-	update_option( 'edd_doing_upgrade', $doing_upgrade_args );
-	if ( $step > $steps ) {
-		// Prevent a weird case where the estimate was off. Usually only a couple.
-		$steps = $step;
+	if ( ! current_user_can( 'manage_shop_settings' ) || 'stripe_customer_id_migration' !== $action || ! has_action( 'edd_stripe_customer_id_migration' ) ) {
+		wp_die( __( 'This action is not allowed.', 'easy-digital-downloads' ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
+		return;
 	}
+
+	$step = isset( $_GET['step'] ) && is_scalar( $_GET['step'] ) ? max( 1, absint( $_GET['step'] ) ) : 1;
+	$total = isset( $_GET['total'] ) && is_scalar( $_GET['total'] ) ? absint( $_GET['total'] ) : 0;
+	$number = isset( $_GET['number'] ) && is_scalar( $_GET['number'] ) ? max( 1, absint( $_GET['number'] ) ) : 10;
+	$steps = max( $step, (int) ceil( $total / $number ) );
+
+	update_option( 'edd_doing_upgrade', array(
+		'page' => 'edd-upgrades',
+		'edd-upgrade' => $action,
+		'step' => $step,
+		'total' => $total,
+		'number' => $number,
+		'steps' => $steps,
+	) );
+
+	$url = add_query_arg( array(
+		'edd_action' => $action,
+		'step' => $step,
+		'total' => $total,
+		'number' => $number,
+	), admin_url( 'index.php' ) );
 	?>
 	<div class="wrap">
 		<h2><?php _e( 'Easy Digital Downloads - Upgrades', 'easy-digital-downloads' ); ?></h2>
-
-		<?php if( ! empty( $action ) ) : ?>
-
-			<div id="edd-upgrade-status">
-				<p><?php _e( 'The upgrade process has started, please be patient. This could take several minutes. You will be automatically redirected when the upgrade is finished.', 'easy-digital-downloads' ); ?></p>
-
-				<?php if( ! empty( $total ) ) : ?>
-					<p><strong><?php printf( __( 'Step %d of approximately %d running', 'easy-digital-downloads' ), $step, $steps ); ?></strong></p>
-				<?php endif; ?>
-			</div>
-			<script type="text/javascript">
-				setTimeout(function() { document.location.href = "index.php?edd_action=<?php echo $action; ?>&step=<?php echo $step; ?>&total=<?php echo $total; ?>&custom=<?php echo $custom; ?>"; }, 250);
-			</script>
-
-		<?php else : ?>
-
-			<div id="edd-upgrade-status">
-				<p>
-					<?php _e( 'The upgrade process has started, please be patient. This could take several minutes. You will be automatically redirected when the upgrade is finished.', 'easy-digital-downloads' ); ?>
-					<img src="<?php echo EDD_PLUGIN_URL . '/assets/images/loading.gif'; ?>" id="edd-upgrade-loader"/>
-				</p>
-			</div>
-			<script type="text/javascript">
-				jQuery( document ).ready( function() {
-					// Trigger upgrades on page load
-					var data = { action: 'edd_trigger_upgrades' };
-					jQuery.post( ajaxurl, data, function (response) {
-						if( response == 'complete' ) {
-							jQuery('#edd-upgrade-loader').hide();
-							document.location.href = 'index.php?page=edd-about'; // Redirect to the welcome page
-						}
-					});
-				});
-			</script>
-
-		<?php endif; ?>
-
+		<div id="edd-upgrade-status">
+			<p><?php _e( 'The upgrade process has started, please be patient. This could take several minutes. You will be automatically redirected when the upgrade is finished.', 'easy-digital-downloads' ); ?></p>
+			<?php if ( $total ) : ?>
+				<p><strong><?php printf( __( 'Step %d of approximately %d running', 'easy-digital-downloads' ), $step, $steps ); ?></strong></p>
+			<?php endif; ?>
+		</div>
+		<script type="text/javascript">
+			setTimeout(function() { document.location.href = <?php echo wp_json_encode( $url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>; }, 250);
+		</script>
 	</div>
 	<?php
 }

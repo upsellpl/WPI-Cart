@@ -195,9 +195,7 @@ function edd_run_install() {
 	set_transient( '_edd_installed', $merged_options, 30 );
 
 	if ( ! $current_version ) {
-		require_once EDD_PLUGIN_DIR . 'includes/admin/upgrades/upgrade-functions.php';
-
-		// When new upgrade routines are added, mark them as complete on fresh install
+		// Preserve the current data-format flags used by the API on fresh installs.
 		$upgrade_routines = array(
 			'upgrade_payment_taxes',
 			'upgrade_customer_payments_association',

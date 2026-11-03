@@ -785,6 +785,22 @@ function edd_set_upload_dir( $upload ) {
 	return $upload;
 }
 
+// Shared by the Publigo installer and Stripe; this only records state, never runs migrations.
+function edd_set_upgrade_complete( $upgrade_action = '' ) {
+
+	if ( empty( $upgrade_action ) ) {
+		return false;
+	}
+
+	$completed_upgrades   = edd_get_completed_upgrades();
+	$completed_upgrades[] = $upgrade_action;
+
+	// Remove any blanks, and only show uniques
+	$completed_upgrades = array_unique( array_values( $completed_upgrades ) );
+
+	return update_option( 'edd_completed_upgrades', $completed_upgrades );
+}
+
 /**
  * Check if the upgrade routine has been run for a specific action
  *
