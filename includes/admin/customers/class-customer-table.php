@@ -154,7 +154,6 @@ class EDD_Customer_Reports_Table extends WP_List_Table {
 		$view_url    = admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id=' . $item['id'] );
 		$actions     = array(
 			'view'   => '<a href="' . $view_url . '">' . __( 'View', 'easy-digital-downloads' ) . '</a>',
-			'logs'   => '<a href="' . admin_url( 'edit.php?post_type=download&page=edd-reports&tab=logs&user=' . urlencode( $user ) ) . '">' . __( 'Download log', 'easy-digital-downloads' ) . '</a>',
 			'delete' => '<a href="' . admin_url( 'edit.php?post_type=download&page=edd-customers&view=delete&id=' . $item['id'] ) . '">' . __( 'Delete', 'easy-digital-downloads' ) . '</a>'
 		);
 

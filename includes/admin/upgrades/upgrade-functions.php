@@ -292,27 +292,6 @@ function edd_v131_upgrades() {
 				}
 			}
 
-			// Convert file download logs
-			$file_logs = edd_get_file_download_log( $download->ID, false );
-
-			if ( $file_logs ) {
-				foreach ( $file_logs['downloads'] as $log ) {
-					$log_data = array(
-						'post_parent'	=> $download->ID,
-						'post_date'		=> $log['date'],
-						'log_type'		=> 'file_download'
-
-					);
-
-					$log_meta = array(
-						'user_info'	=> $log['user_info'],
-						'file_id'	=> $log['file_id'],
-						'ip'		=> $log['ip']
-					);
-
-					$log = $edd_log->insert_log( $log_data, $log_meta );
-				}
-			}
 		}
 	}
 	add_option( 'edd_logs_upgraded', '1' );

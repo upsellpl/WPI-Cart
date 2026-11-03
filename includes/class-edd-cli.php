@@ -331,7 +331,7 @@ class EDD_CLI extends WP_CLI_Command {
 				WP_CLI::line( '' );
 				WP_CLI::line( sprintf( __( 'Purchases: %s', 'easy-digital-downloads' ), $customer['stats']['total_purchases'] ) );
 				WP_CLI::line( sprintf( __( 'Total Spent: %s', 'easy-digital-downloads' ), edd_format_amount( $customer['stats']['total_spent'] ) . ' ' . edd_get_currency() ) );
-				WP_CLI::line( sprintf( __( 'Total Downloads: %s', 'easy-digital-downloads' ), $customer['stats']['total_downloads'] ) );
+				WP_CLI::line( 'File download statistics: retired' );
 
 				WP_CLI::line( '' );
 			}
