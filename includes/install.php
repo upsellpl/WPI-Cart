@@ -203,9 +203,8 @@ function edd_run_install() {
 			'remove_refunded_sale_logs'
 		);
 
-		foreach ( $upgrade_routines as $upgrade ) {
-			edd_set_upgrade_complete( $upgrade );
-		}
+		$completed_upgrades = array_unique( array_values( array_merge( edd_get_completed_upgrades(), $upgrade_routines ) ) );
+		update_option( 'edd_completed_upgrades', $completed_upgrades );
 	}
 
 	// Bail if activating from network, or bulk
