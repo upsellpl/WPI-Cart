@@ -199,104 +199,54 @@ add_action( 'init', 'edd_listen_for_paypal_ipn' );
  * @return void
  */
 function edd_process_paypal_ipn() {
-	// Check the request method is POST
-	if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] != 'POST' ) {
+	if ( ( $_SERVER['REQUEST_METHOD'] ?? '' ) !== 'POST' ) {
+		return;
+	}
+	$post_data = file_get_contents( 'php://input' );
+	if ( ! is_string( $post_data ) || $post_data === '' ) {
 		return;
 	}
 
-	// Set initial post data to empty string
-	$post_data = '';
-
-	// Fallback just in case post_max_size is lower than needed
-	if ( ini_get( 'allow_url_fopen' ) ) {
-		$post_data = file_get_contents( 'php://input' );
-	} else {
-		// If allow_url_fopen is not enabled, then make sure that post_max_size is large enough
-		ini_set( 'post_max_size', '12M' );
-	}
-	// Start the encoded data collection with notification command
-	$encoded_data = 'cmd=_notify-validate';
-
-	// Get current arg separator
-	$arg_separator = edd_get_php_arg_separator_output();
-
-	// Verify there is a post_data
-	if ( $post_data || strlen( $post_data ) > 0 ) {
-		// Append the data
-		$encoded_data .= $arg_separator.$post_data;
-	} else {
-		// Check if POST is empty
-		if ( empty( $_POST ) ) {
-			// Nothing to do
+	parse_str( $post_data, $encoded_data_array );
+	foreach ( $encoded_data_array as $value ) {
+		if ( ! is_string( $value ) ) {
 			return;
-		} else {
-			// Loop through each POST
-			foreach ( $_POST as $key => $value ) {
-				// Encode the value and append the data
-				$encoded_data .= $arg_separator."$key=" . urlencode( $value );
-			}
 		}
 	}
-
-
-
-	// Convert collected post data to an array
-	parse_str( $encoded_data, $encoded_data_array );
-
-	foreach ( $encoded_data_array as $key => $value ) {
-
-		if ( false !== strpos( $key, 'amp;' ) ) {
-			$new_key = str_replace( '&amp;', '&', $key );
-			$new_key = str_replace( 'amp;', '&' , $new_key );
-
-			unset( $encoded_data_array[ $key ] );
-			$encoded_data_array[ $new_key ] = $value;
-		}
-
-	}
-
-	// Get the PayPal redirect uri
-	$paypal_redirect = edd_get_paypal_redirect( true );
-
-	if ( ! edd_get_option( 'disable_paypal_verification' ) ) {
-
-		// Validate the IPN
-
-		$remote_post_vars      = array(
-			'method'           => 'POST',
-			'timeout'          => 45,
-			'redirection'      => 5,
-			'httpversion'      => '1.1',
-			'blocking'         => true,
-			'headers'          => array(
-				'host'         => 'www.paypal.com',
-				'connection'   => 'close',
-				'content-type' => 'application/x-www-form-urlencoded',
-				'post'         => '/cgi-bin/webscr HTTP/1.1',
-
-			),
-			'sslverify'        => false,
-			'body'             => $encoded_data_array
-		);
-
-		// Get response
-		$api_response = wp_remote_post( edd_get_paypal_redirect(), $remote_post_vars );
-
-		if ( is_wp_error( $api_response ) ) {
-			edd_record_gateway_error( __( 'IPN Error', 'easy-digital-downloads' ), sprintf( __( 'Invalid IPN verification response. IPN data: %s', 'easy-digital-downloads' ), json_encode( $api_response ) ) );
-			return; // Something went wrong
-		}
-
-		if ( $api_response['body'] !== 'VERIFIED' && edd_get_option( 'disable_paypal_verification', false ) ) {
-			edd_record_gateway_error( __( 'IPN Error', 'easy-digital-downloads' ), sprintf( __( 'Invalid IPN verification response. IPN data: %s', 'easy-digital-downloads' ), json_encode( $api_response ) ) );
-			return; // Response not okay
-		}
-
-	}
-
-	// Check if $post_data_array has been populated
-	if ( ! is_array( $encoded_data_array ) && !empty( $encoded_data_array ) )
+	if ( isset( $encoded_data_array['cmd'] ) ) {
 		return;
+	}
+
+	$sandbox = edd_is_test_mode();
+	if ( isset( $encoded_data_array['test_ipn'] ) && $encoded_data_array['test_ipn'] !== ( $sandbox ? '1' : '0' ) ) {
+		return;
+	}
+	$verification_url = $sandbox
+		? 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr'
+		: 'https://ipnpb.paypal.com/cgi-bin/webscr';
+
+	$remote_post_vars = array(
+		'method'           => 'POST',
+		'timeout'          => 45,
+		'redirection'      => 0,
+		'httpversion'      => '1.1',
+		'blocking'         => true,
+		'headers'          => array(
+			'connection'   => 'close',
+			'content-type' => 'application/x-www-form-urlencoded',
+		),
+		'sslverify'        => true,
+		// Preserve the original fields, encoding and order for the PayPal postback.
+		'body'             => 'cmd=_notify-validate&' . $post_data
+	);
+	$api_response = wp_remote_post( $verification_url, $remote_post_vars );
+	if ( is_wp_error( $api_response ) || wp_remote_retrieve_response_code( $api_response ) !== 200 || wp_remote_retrieve_body( $api_response ) !== 'VERIFIED' ) {
+		if ( is_wp_error( $api_response ) || wp_remote_retrieve_response_code( $api_response ) !== 200 ) {
+			status_header( 503 );
+		}
+		edd_record_gateway_error( __( 'IPN Error', 'easy-digital-downloads' ), __( 'PayPal IPN verification failed. No payment changes were made.', 'easy-digital-downloads' ) );
+		return;
+	}
 
 	$defaults = array(
 		'txn_type'       => '',
@@ -305,7 +255,10 @@ function edd_process_paypal_ipn() {
 
 	$encoded_data_array = wp_parse_args( $encoded_data_array, $defaults );
 
-	$payment_id = isset( $encoded_data_array['custom'] ) ? absint( $encoded_data_array['custom'] ) : 0;
+	if ( empty( $encoded_data_array['custom'] ) || ! ctype_digit( $encoded_data_array['custom'] ) ) {
+		return;
+	}
+	$payment_id = absint( $encoded_data_array['custom'] );
 
 	if ( has_action( 'edd_paypal_' . $encoded_data_array['txn_type'] ) ) {
 		// Allow PayPal IPN types to be processed separately
@@ -318,6 +271,57 @@ function edd_process_paypal_ipn() {
 }
 add_action( 'edd_verify_paypal_ipn', 'edd_process_paypal_ipn' );
 
+function edd_paypal_validate_payment_data( $data, $payment_id ) {
+	$required = array( 'payment_status', 'mc_gross', 'mc_currency', 'txn_id' );
+	foreach ( $required as $field ) {
+		if ( ! isset( $data[ $field ] ) || ! is_string( $data[ $field ] ) || $data[ $field ] === '' ) {
+			return false;
+		}
+	}
+	if ( ! $payment_id || get_post_type( $payment_id ) !== 'edd_payment' || edd_get_payment_gateway( $payment_id ) !== 'paypal' ) {
+		return false;
+	}
+	$mode = edd_get_payment_meta( $payment_id, '_edd_payment_mode' );
+	if ( $mode !== ( edd_is_test_mode() ? 'test' : 'live' ) ) {
+		return false;
+	}
+	$payment_meta = edd_get_payment_meta( $payment_id );
+	$recipient = isset( $data['business'] ) && is_string( $data['business'] ) && is_email( $data['business'] )
+		? trim( $data['business'] ) : ( $data['receiver_email'] ?? '' );
+	$expected_recipient = trim( (string) edd_get_option( 'paypal_email', '' ) );
+	if ( ! is_string( $recipient ) || ! is_email( $recipient ) || $expected_recipient === '' || strcasecmp( trim( $recipient ), $expected_recipient ) !== 0 ) {
+		return false;
+	}
+	if ( empty( $payment_meta['currency'] ) || strcasecmp( $data['mc_currency'], $payment_meta['currency'] ) !== 0 ) {
+		return false;
+	}
+	if ( ! preg_match( '/^[A-Za-z0-9-]+$/D', $data['txn_id'] ) || ! preg_match( '/^-?\d+(?:\.\d{1,2})?$/D', $data['mc_gross'] ) ) {
+		return false;
+	}
+	$status = strtolower( $data['payment_status'] );
+	if ( $status === 'refunded' || $status === 'reversed' ) {
+		$transaction_id = edd_get_payment_transaction_id( $payment_id );
+		return ! empty( $transaction_id ) && isset( $data['parent_txn_id'] )
+			&& is_string( $data['parent_txn_id'] ) && hash_equals( (string) $transaction_id, $data['parent_txn_id'] )
+			&& (float) $data['mc_gross'] < 0;
+	}
+	$purchase_key = $data['invoice'] ?? ( $data['item_number'] ?? '' );
+	$expected_key = (string) edd_get_payment_key( $payment_id );
+	if ( ! is_string( $purchase_key ) || $expected_key === '' || ! hash_equals( $expected_key, $purchase_key ) ) {
+		return false;
+	}
+	$transaction_payment = edd_get_purchase_id_by_transaction_id( $data['txn_id'] );
+	if ( $transaction_payment && (int) $transaction_payment !== (int) $payment_id ) {
+		return false;
+	}
+	$transaction_id = edd_get_payment_transaction_id( $payment_id );
+	if ( $transaction_id && ! hash_equals( (string) $transaction_id, $data['txn_id'] ) ) {
+		return false;
+	}
+	// Keep accepting overpayments, without comparing formatted strings containing thousands separators.
+	return round( (float) $data['mc_gross'], 2 ) >= round( (float) edd_get_payment_amount( $payment_id ), 2 );
+}
+
 /**
  * Process web accept (one time) payment IPNs
  *
@@ -326,43 +330,17 @@ add_action( 'edd_verify_paypal_ipn', 'edd_process_paypal_ipn' );
  * @return void
  */
 function edd_process_paypal_web_accept_and_cart( $data, $payment_id ) {
-	if ( $data['txn_type'] != 'web_accept' && $data['txn_type'] != 'cart' && $data['payment_status'] != 'Refunded' ) {
+	if ( ! edd_paypal_validate_payment_data( $data, $payment_id ) ) {
+		edd_record_gateway_error( __( 'IPN Error', 'easy-digital-downloads' ), __( 'PayPal IPN does not match the payment. No payment changes were made.', 'easy-digital-downloads' ), $payment_id );
 		return;
 	}
-
-	if( empty( $payment_id ) ) {
+	if ( ( $data['txn_type'] ?? '' ) != 'web_accept' && ( $data['txn_type'] ?? '' ) != 'cart' && ! in_array( strtolower( $data['payment_status'] ), array( 'refunded', 'reversed' ), true ) ) {
 		return;
 	}
 
 	// Collect payment details
-	$purchase_key   = isset( $data['invoice'] ) ? $data['invoice'] : $data['item_number'];
-	$paypal_amount  = $data['mc_gross'];
 	$payment_status = strtolower( $data['payment_status'] );
-	$currency_code  = strtolower( $data['mc_currency'] );
-	$business_email = isset( $data['business'] ) && is_email( $data['business'] ) ? trim( $data['business'] ) : trim( $data['receiver_email'] );
 	$payment_meta   = edd_get_payment_meta( $payment_id );
-
-
-	if ( edd_get_payment_gateway( $payment_id ) != 'paypal' ) {
-		return; // this isn't a PayPal standard IPN
-	}
-
-	// Verify payment recipient
-	if ( strcasecmp( $business_email, trim( edd_get_option( 'paypal_email', false ) ) ) != 0 ) {
-		edd_record_gateway_error( __( 'IPN Error', 'easy-digital-downloads' ), sprintf( __( 'Invalid business email in IPN response. IPN data: %s', 'easy-digital-downloads' ), json_encode( $data ) ), $payment_id );
-		edd_update_payment_status( $payment_id, 'failed' );
-		edd_insert_payment_note( $payment_id, __( 'Payment failed due to invalid PayPal business email.', 'easy-digital-downloads' ) );
-		return;
-	}
-
-	// Verify payment currency
-	if ( $currency_code != strtolower( $payment_meta['currency'] ) ) {
-
-		edd_record_gateway_error( __( 'IPN Error', 'easy-digital-downloads' ), sprintf( __( 'Invalid currency in IPN response. IPN data: %s', 'easy-digital-downloads' ), json_encode( $data ) ), $payment_id );
-		edd_update_payment_status( $payment_id, 'failed' );
-		edd_insert_payment_note( $payment_id, __( 'Payment failed due to invalid currency in PayPal IPN.', 'easy-digital-downloads' ) );
-		return;
-	}
 
 	if ( ! edd_get_payment_user_email( $payment_id ) ) {
 
@@ -403,25 +381,7 @@ function edd_process_paypal_web_accept_and_cart( $data, $payment_id ) {
 			return; // Only complete payments once
 		}
 
-		// Retrieve the total purchase amount (before PayPal)
-		$payment_amount = edd_get_payment_amount( $payment_id );
-
-		if ( number_format( (float) $paypal_amount, 2 ) < number_format( (float) $payment_amount, 2 ) ) {
-			// The prices don't match
-			edd_record_gateway_error( __( 'IPN Error', 'easy-digital-downloads' ), sprintf( __( 'Invalid payment amount in IPN response. IPN data: %s', 'easy-digital-downloads' ), json_encode( $data ) ), $payment_id );
-			edd_update_payment_status( $payment_id, 'failed' );
-			edd_insert_payment_note( $payment_id, __( 'Payment failed due to invalid amount in PayPal IPN.', 'easy-digital-downloads' ) );
-			return;
-		}
-		if ( $purchase_key != edd_get_payment_key( $payment_id ) ) {
-			// Purchase keys don't match
-			edd_record_gateway_error( __( 'IPN Error', 'easy-digital-downloads' ), sprintf( __( 'Invalid purchase key in IPN response. IPN data: %s', 'easy-digital-downloads' ), json_encode( $data ) ), $payment_id );
-			edd_update_payment_status( $payment_id, 'failed' );
-			edd_insert_payment_note( $payment_id, __( 'Payment failed due to invalid purchase key in PayPal IPN.', 'easy-digital-downloads' ) );
-			return;
-		}
-
-		if ( 'completed' == $payment_status || edd_is_test_mode() ) {
+		if ( 'completed' == $payment_status ) {
 
 			edd_insert_payment_note( $payment_id, sprintf( __( 'PayPal Transaction ID: %s', 'easy-digital-downloads' ) , $data['txn_id'] ) );
 			edd_set_payment_transaction_id( $payment_id, $data['txn_id'] );
@@ -511,10 +471,7 @@ add_action( 'edd_paypal_web_accept', 'edd_process_paypal_web_accept_and_cart', 1
  * @return void
  */
 function edd_process_paypal_refund( $data, $payment_id = 0 ) {
-
-	// Collect payment details
-
-	if( empty( $payment_id ) ) {
+	if ( ! edd_paypal_validate_payment_data( $data, $payment_id ) || ! in_array( strtolower( $data['payment_status'] ), array( 'refunded', 'reversed' ), true ) ) {
 		return;
 	}
 
@@ -525,14 +482,14 @@ function edd_process_paypal_refund( $data, $payment_id = 0 ) {
 	$payment_amount = edd_get_payment_amount( $payment_id );
 	$refund_amount  = $data['mc_gross'] * -1;
 
-	if ( number_format( (float) $refund_amount, 2 ) < number_format( (float) $payment_amount, 2 ) ) {
+	if ( round( (float) $refund_amount, 2 ) < round( (float) $payment_amount, 2 ) ) {
 
 		edd_insert_payment_note( $payment_id, sprintf( __( 'Partial PayPal refund processed: %s', 'easy-digital-downloads' ), $data['parent_txn_id'] ) );
 		return; // This is a partial refund
 
 	}
 
-	edd_insert_payment_note( $payment_id, sprintf( __( 'PayPal Payment #%s Refunded for reason: %s', 'easy-digital-downloads' ), $data['parent_txn_id'], $data['reason_code'] ) );
+	edd_insert_payment_note( $payment_id, sprintf( __( 'PayPal Payment #%s Refunded for reason: %s', 'easy-digital-downloads' ), $data['parent_txn_id'], sanitize_text_field( $data['reason_code'] ?? '' ) ) );
 	edd_insert_payment_note( $payment_id, sprintf( __( 'PayPal Refund Transaction ID: %s', 'easy-digital-downloads' ), $data['txn_id'] ) );
 	edd_update_payment_status( $payment_id, 'refunded' );
 }
