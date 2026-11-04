@@ -980,6 +980,32 @@ function edd_settings_sanitize_misc_file_downloads( $input ) {
 add_filter( 'edd_settings_misc-file_downloads_sanitize', 'edd_settings_sanitize_misc_file_downloads' );
 
 /**
+ * Misc Accounting Settings Sanitization
+ *
+ * @since 2.5
+ * @param array $input The value inputted in the field
+ * @return string $input Sanitizied value
+ */
+function edd_settings_sanitize_misc_accounting( $input ) {
+
+	global $edd_options;
+
+	if( ! current_user_can( 'manage_shop_settings' ) ) {
+		return $input;
+	}
+
+	if( ! empty( $input['enable_sequential'] ) && ! edd_get_option( 'enable_sequential' ) ) {
+
+		// Shows an admin notice about upgrading previous order numbers
+		EDD()->session->set( 'upgrade_sequential', '1' );
+
+	}
+
+	return $input;
+}
+add_filter( 'edd_settings_misc-accounting_sanitize', 'edd_settings_sanitize_misc_accounting' );
+
+/**
  * Taxes Settings Sanitization
  *
  * Adds a settings error (for the updated message)

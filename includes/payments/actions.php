@@ -193,6 +193,46 @@ function edd_clear_user_history_cache( $payment_id, $new_status, $old_status ) {
 add_action( 'edd_update_payment_status', 'edd_clear_user_history_cache', 10, 3 );
 
 /**
+ * Updates all old payments, prior to 1.2, with new
+ * meta for the total purchase amount
+ *
+ * This is so that payments can be queried by their totals
+ *
+ * @since 1.2
+ * @param array $data Arguments passed
+ * @return void
+*/
+function edd_update_old_payments_with_totals( $data ) {
+	if ( ! wp_verify_nonce( $data['_wpnonce'], 'edd_upgrade_payments_nonce' ) ) {
+		return;
+	}
+
+	if ( get_option( 'edd_payment_totals_upgraded' ) ) {
+		return;
+	}
+
+	$payments = edd_get_payments( array(
+		'offset' => 0,
+		'number' => -1,
+		'mode'   => 'all',
+	) );
+
+	if ( $payments ) {
+		foreach ( $payments as $payment ) {
+
+			$payment = new EDD_Payment( $payment->ID );
+			$meta    = $payment->get_meta();
+
+			$payment->total = $meta['amount'];
+			$payment->save();
+		}
+	}
+
+	add_option( 'edd_payment_totals_upgraded', 1 );
+}
+add_action( 'edd_upgrade_payments', 'edd_update_old_payments_with_totals' );
+
+/**
  * Updates week-old+ 'pending' orders to 'abandoned'
  *
  * @since 1.6

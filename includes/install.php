@@ -195,7 +195,9 @@ function edd_run_install() {
 	set_transient( '_edd_installed', $merged_options, 30 );
 
 	if ( ! $current_version ) {
-		// Preserve the current data-format flags used by the API on fresh installs.
+		require_once EDD_PLUGIN_DIR . 'includes/admin/upgrades/upgrade-functions.php';
+
+		// When new upgrade routines are added, mark them as complete on fresh install
 		$upgrade_routines = array(
 			'upgrade_payment_taxes',
 			'upgrade_customer_payments_association',
@@ -203,8 +205,9 @@ function edd_run_install() {
 			'remove_refunded_sale_logs'
 		);
 
-		$completed_upgrades = array_unique( array_values( array_merge( edd_get_completed_upgrades(), $upgrade_routines ) ) );
-		update_option( 'edd_completed_upgrades', $completed_upgrades );
+		foreach ( $upgrade_routines as $upgrade ) {
+			edd_set_upgrade_complete( $upgrade );
+		}
 	}
 
 	// Bail if activating from network, or bulk
