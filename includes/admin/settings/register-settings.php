@@ -435,12 +435,6 @@ function edd_get_registered_settings() {
 						'type' => 'text',
 						'size' => 'regular',
 					),
-					'disable_paypal_verification' => array(
-						'id'   => 'disable_paypal_verification',
-						'name' => __( 'Disable PayPal IPN Verification', 'easy-digital-downloads' ),
-						'desc' => __( 'If payments are not getting marked as complete, then check this box. This forces the site to use a slightly less secure method of verifying purchases.', 'easy-digital-downloads' ),
-						'type' => 'checkbox',
-					),
 				),
 			)
 		),
