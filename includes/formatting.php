@@ -194,9 +194,9 @@ function edd_currency_filter( $price = '', $currency = '' ) {
  * @param int $decimals Number of decimal places
  * @return int $decimals
 */
-function edd_currency_decimal_filter( $decimals = 2 ) {
+function edd_currency_decimal_filter( $decimals = 2, $currency = null ) {
 
-	$currency = edd_get_currency();
+	$currency = $currency === null ? edd_get_currency() : $currency;
 
 	switch ( $currency ) {
 		case 'RIAL' :
