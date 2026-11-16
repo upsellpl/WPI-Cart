@@ -68,25 +68,7 @@ function edd_get_download_sales_log( $download_id, $paginate = false, $number = 
  * @return mixed array|bool
 */
 function edd_get_file_download_log( $download_id, $paginate = false, $number = 10, $offset = 0 ) {
-	$backtrace = debug_backtrace();
-
-	_edd_deprecated_function( __FUNCTION__, '1.3.4', null, $backtrace );
-
-	$download_log = get_post_meta( $download_id, '_edd_file_download_log', true );
-
-	if ( $download_log ) {
-		$download_log = array_reverse( $download_log );
-		$log = array();
-		$log['number'] = count( $download_log );
-		$log['downloads'] = $download_log;
-
-		if ( $paginate ) {
-			$log['downloads'] = array_slice( $download_log, $offset, $number );
-		}
-
-		return $log;
-	}
-
+	// Retired in WPI-Cart; retained for extension compatibility.
 	return false;
 }
 
@@ -512,15 +494,6 @@ function edd_verify_download_link( $download_id = 0, $key = '', $email = '', $ex
 
 					$file_condition = edd_get_file_price_condition( $cart_item['id'], $file_key );
 
-					// Check to see if the file download limit has been reached
-					if ( edd_is_file_at_download_limit( $cart_item['id'], $payment->ID, $file_key, $price_id ) )
-						wp_die( apply_filters( 'edd_download_limit_reached_text', __( 'Sorry but you have hit your download limit for this file.', 'easy-digital-downloads' ) ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
-
-					// If this download has variable prices, we have to confirm that this file was included in their purchase
-					if ( ! empty( $price_options ) && $file_condition != 'all' && edd_has_variable_prices( $cart_item['id'] ) ) {
-						if ( $file_condition == $price_options['price_id'] )
-							return $payment->ID;
-					}
 
 					// Make sure the link hasn't expired
 
@@ -531,6 +504,14 @@ function edd_verify_download_link( $download_id = 0, $key = '', $email = '', $ex
 					if ( current_time( 'timestamp' ) > $expire ) {
 						wp_die( apply_filters( 'edd_download_link_expired_text', __( 'Sorry but your download link has expired.', 'easy-digital-downloads' ) ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
 					}
+
+					// If this download has variable prices, we have to confirm that this file was included in their purchase
+					if ( ! empty( $price_options ) && $file_condition != 'all' && edd_has_variable_prices( $cart_item['id'] ) ) {
+						if ( $file_condition == $price_options['price_id'] )
+							return $payment->ID;
+						continue;
+					}
+
 					return $payment->ID; // Payment has been verified and link is still valid
 				}
 

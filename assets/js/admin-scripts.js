@@ -159,17 +159,14 @@ jQuery(document).ready(function ($) {
 			$( document.body ).on( 'change', '#_edd_product_type', function(e) {
 
 				var edd_products            = $( '#edd_products' ),
-					edd_download_files      = $( '#edd_download_files' ),
-					edd_download_limit_wrap = $( '#edd_download_limit_wrap' );
+					edd_download_files      = $( '#edd_download_files' );
 
 				if ( 'bundle' === $( this ).val() ) {
 					edd_products.show();
 					edd_download_files.hide();
-					edd_download_limit_wrap.hide();
 				} else {
 					edd_products.hide();
 					edd_download_files.show();
-					edd_download_limit_wrap.show();
 				}
 
 			});

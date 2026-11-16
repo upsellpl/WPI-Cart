@@ -636,27 +636,11 @@ function edd_record_sale_in_log( $download_id, $payment_id, $price_id = false, $
  * @param int $payment_id Payment ID
  * @param int $price_id Price ID, if any
  * @return void
+ * @deprecated File download logging and count limits are retired in WPI-Cart.
  */
 function edd_record_download_in_log( $download_id, $file_id, $user_info, $ip, $payment_id, $price_id = false ) {
-    global $edd_logs;
-
-    $log_data = array(
-        'post_parent'	=> $download_id,
-        'log_type'		=> 'file_download'
-    );
-
-    $user_id = isset( $user_info['id'] ) ? $user_info['id'] : (int) -1;
-
-    $log_meta = array(
-        'user_info'	=> $user_info,
-        'user_id'	=> $user_id,
-        'file_id'	=> (int) $file_id,
-        'ip'		=> $ip,
-        'payment_id'=> $payment_id,
-        'price_id'  => (int) $price_id
-    );
-
-    $edd_logs->insert_log( $log_data, $log_meta );
+	// Retired in WPI-Cart; retained for extension compatibility.
+	return;
 }
 
 /**
@@ -819,23 +803,11 @@ function edd_get_file_name( $file = array() ) {
  * @param int $file_key File key
  * @param int $payment_id The ID number of the associated payment
  * @return int Number of times the file has been downloaded for the purchase
+ * @deprecated File download logging and count limits are retired in WPI-Cart.
  */
 function edd_get_file_downloaded_count( $download_id = 0, $file_key = 0, $payment_id = 0 ) {
-    global $edd_logs;
-
-    $meta_query = array(
-        'relation'	=> 'AND',
-        array(
-            'key' 	=> '_edd_log_file_id',
-            'value' => (int) $file_key
-        ),
-        array(
-            'key' 	=> '_edd_log_payment_id',
-            'value' => (int) $payment_id
-        )
-    );
-
-    return $edd_logs->get_log_count( $download_id, 'file_download', $meta_query );
+	// Retired in WPI-Cart; retained for extension compatibility.
+	return 0;
 }
 
 
@@ -848,10 +820,11 @@ function edd_get_file_downloaded_count( $download_id = 0, $file_key = 0, $paymen
  * @since 1.3.1
  * @param int $download_id Download ID
  * @return int $limit File download limit
+ * @deprecated File download logging and count limits are retired in WPI-Cart.
  */
 function edd_get_file_download_limit( $download_id = 0 ) {
-    $download = new EDD_Download( $download_id );
-    return $download->get_file_download_limit();
+	// Retired in WPI-Cart; retained for extension compatibility.
+	return 0;
 }
 
 /**
@@ -863,13 +836,11 @@ function edd_get_file_download_limit( $download_id = 0 ) {
  * @param int $download_id Download ID
  * @param int $payment_id Payment ID
  * @return int $limit_override The new limit
+ * @deprecated File download logging and count limits are retired in WPI-Cart.
  */
 function edd_get_file_download_limit_override( $download_id = 0, $payment_id = 0 ) {
-    $limit_override = get_post_meta( $download_id, '_edd_download_limit_override_' . $payment_id, true );
-    if ( $limit_override ) {
-        return absint( $limit_override );
-    }
-    return 0;
+	// Retired in WPI-Cart; retained for extension compatibility.
+	return 0;
 }
 
 /**
@@ -883,18 +854,11 @@ function edd_get_file_download_limit_override( $download_id = 0, $payment_id = 0
  * @param int $download_id Download ID
  * @param int $payment_id Payment ID
  * @return void
+ * @deprecated File download logging and count limits are retired in WPI-Cart.
  */
 function edd_set_file_download_limit_override( $download_id = 0, $payment_id = 0 ) {
-    $override 	= edd_get_file_download_limit_override( $download_id, $payment_id );
-    $limit 		= edd_get_file_download_limit( $download_id );
-
-    if ( ! empty( $override ) ) {
-        $override = $override += 1;
-    } else {
-        $override = $limit += 1;
-    }
-
-    update_post_meta( $download_id, '_edd_download_limit_override_' . $payment_id, $override );
+	// Retired in WPI-Cart; retained for extension compatibility.
+	return;
 }
 
 /**
@@ -910,49 +874,11 @@ function edd_set_file_download_limit_override( $download_id = 0, $payment_id = 0
  * @param int $file_id File ID
  * @param int $price_id Price ID
  * @return bool True if at limit, false otherwise
+ * @deprecated File download logging and count limits are retired in WPI-Cart.
  */
 function edd_is_file_at_download_limit( $download_id = 0, $payment_id = 0, $file_id = 0, $price_id = false ) {
-
-    // Checks to see if at limit
-    $logs = new EDD_Logging();
-
-    $meta_query = array(
-        'relation'	=> 'AND',
-        array(
-            'key' 	=> '_edd_log_file_id',
-            'value' => (int) $file_id
-        ),
-        array(
-            'key' 	=> '_edd_log_payment_id',
-            'value' => (int) $payment_id
-        ),
-        array(
-            'key' 	=> '_edd_log_price_id',
-            'value' => (int) $price_id
-        )
-    );
-
-    $ret                = false;
-    $download_count     = $logs->get_log_count( $download_id, 'file_download', $meta_query );
-
-    $download_limit     = edd_get_file_download_limit( $download_id );
-    $unlimited_purchase = edd_payment_has_unlimited_downloads( $payment_id );
-
-    if ( ! empty( $download_limit ) && empty( $unlimited_purchase ) ) {
-        if ( $download_count >= $download_limit ) {
-            $ret = true;
-
-            // Check to make sure the limit isn't overwritten
-            // A limit is overwritten when purchase receipt is resent
-            $limit_override = edd_get_file_download_limit_override( $download_id, $payment_id );
-
-            if ( ! empty( $limit_override ) && $download_count < $limit_override ) {
-                $ret = false;
-            }
-        }
-    }
-
-    return (bool) apply_filters( 'edd_is_file_at_download_limit', $ret, $download_id, $payment_id, $file_id );
+	// Retired in WPI-Cart; retained for extension compatibility.
+	return false;
 }
 
 /**

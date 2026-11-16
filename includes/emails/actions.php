@@ -50,19 +50,6 @@ function edd_resend_purchase_receipt( $data ) {
 
 	edd_email_purchase_receipt( $purchase_id, false );
 
-	// Grab all downloads of the purchase and update their file download limits, if needed
-	// This allows admins to resend purchase receipts to grant additional file downloads
-	$downloads = edd_get_payment_meta_cart_details( $purchase_id, true );
-
-	if ( is_array( $downloads ) ) {
-		foreach ( $downloads as $download ) {
-			$limit = edd_get_file_download_limit( $download['id'] );
-			if ( ! empty( $limit ) ) {
-				edd_set_file_download_limit_override( $download['id'], $purchase_id );
-			}
-		}
-	}
-
 	wp_redirect( add_query_arg( array( 'edd-message' => 'email_sent', 'edd-action' => false, 'purchase_id' => false ) ) );
 	exit;
 }
