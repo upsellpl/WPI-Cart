@@ -294,18 +294,24 @@ add_action( 'edd_update_payment_details', 'edd_update_payment_details' );
  * @return void
  */
 function edd_trigger_purchase_delete( $data ) {
-	if ( wp_verify_nonce( $data['_wpnonce'], 'edd_payment_nonce' ) ) {
-
-		$payment_id = absint( $data['purchase_id'] );
-
-		if( ! current_user_can( 'edit_shop_payments', $payment_id ) ) {
-			wp_die( __( 'You do not have permission to edit this payment record', 'easy-digital-downloads' ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
-		}
-
-		edd_delete_purchase( $payment_id );
-		wp_redirect( admin_url( '/admin.php?page=wp-idea-payment-history&wp-idea-message=payment_deleted' ) );
-		edd_die();
+	$nonce = isset( $data['_wpnonce'] ) ? $data['_wpnonce'] : '';
+	if ( ! wp_verify_nonce( $nonce, 'edd_payment_nonce' ) ) {
+		wp_die( __( 'Nonce verification failed', 'easy-digital-downloads' ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
 	}
+
+	$payment_id = isset( $data['purchase_id'] ) ? absint( $data['purchase_id'] ) : 0;
+
+	if ( empty( $payment_id ) || 'edd_payment' !== get_post_type( $payment_id ) ) {
+		wp_die( __( 'Invalid payment ID', 'easy-digital-downloads' ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 400 ) );
+	}
+
+	if ( ! current_user_can( 'delete_shop_payment', $payment_id ) ) {
+		wp_die( __( 'You do not have permission to delete this payment record', 'easy-digital-downloads' ), __( 'Error', 'easy-digital-downloads' ), array( 'response' => 403 ) );
+	}
+
+	edd_delete_purchase( $payment_id );
+	wp_redirect( admin_url( '/admin.php?page=wp-idea-payment-history&wp-idea-message=payment_deleted' ) );
+	edd_die();
 }
 add_action( 'edd_delete_payment', 'edd_trigger_purchase_delete' );
 

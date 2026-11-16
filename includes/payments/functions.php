@@ -262,6 +262,12 @@ function edd_update_payment_status( $payment_id, $new_status = 'publish' ) {
 function edd_delete_purchase( $payment_id = 0, $update_customer = true, $delete_download_logs = false ) {
     global $edd_logs;
 
+    $payment_id = absint( $payment_id );
+
+    if ( empty( $payment_id ) || 'edd_payment' !== get_post_type( $payment_id ) ) {
+        return;
+    }
+
     $payment   = new EDD_Payment( $payment_id );
 
     // Update sale counts and earnings for all purchased products
